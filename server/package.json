@@ -1,0 +1,17 @@
+{
+  "name": "bomber",
+  "version": "1.0.0",
+  "description": "Bomberman Backend Server",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
