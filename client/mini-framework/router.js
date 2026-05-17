@@ -30,12 +30,9 @@ export class Router {
 
     this.store.set({ filter: currentpath });
 
-    let page = this.routes[currentpath];
-    if (page) {
-      this.dom.mount(page());
-    } else {
-      this.dom.mount(this.dom.el("h4", {}, "404 - Page not found"));
-    }
+    let page = this.routes[currentpath] ?? this.routes["#/notfound"];
+    
+    this.dom.mount(page());
   }
 
   // allows you to register a new route by associating a path with a handler function.

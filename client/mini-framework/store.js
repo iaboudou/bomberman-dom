@@ -12,9 +12,14 @@ export class Store {
       "filter": "#/active",
       "editing": null 
     }*/
+
+    //
+    // {
+    //   todos : () => [router.render()],
+    //   editing : () => [router.render()],
+    // }
     this.state = initialState;
-    this.listeners = [];
-    this.keyListeners = {};
+    this.listeners = {};
   }
 
   // return the current state of the store.
@@ -38,30 +43,23 @@ export class Store {
     this.state = { ...this.state, ...newState };
 
     // Notify key listeners only for keys that changed
-    for (const key in newState) {
-      if (newState[key] !== prevState[key] && this.keyListeners[key]) {
-        this.keyListeners[key].forEach((cb) => cb(this.state[key]));
-      }
-    }
-
-  }
-
-  // allows you to push a new listener function to the this.listeners array, which will be called whenever the state changes.
-  // ex: store.subscribe((newState) => { console.log('State updated:', newState); });
-  subscribe(cb) {
-    this.listeners.push(cb);
+    this.notify(newState, prevState);
   }
 
   // subscribe to a specific key — callback is called only when that key changes
   // ex: store.subscribeKey("players", (players) => { playersDOM.scheduleMount(renderPlayers(players)) });
-  subscribeKey(key, cb) {
-    if (!this.keyListeners[key]) this.keyListeners[key] = [];
-    this.keyListeners[key].push(cb);
+  subscribe(key, cb) {
+    if (!this.listeners[key]) this.listeners[key] = [];
+    this.listeners[key].push(cb);
   }
 
   // call all registered listener functions and passes them the current state,
   // so they can react to state changes (e.g. update UI, log data, etc.)
-  notify() {
-    this.listeners.forEach((listener) => listener(this.state));
+  notify(state, prevState) {
+    for (const key in state) {
+      if (state[key] !== prevState[key] && this.listeners[key]) {
+        this.listeners[key].forEach((cb) => cb(this.state[key]));
+      }
+    }
   }
 }

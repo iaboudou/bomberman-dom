@@ -19,23 +19,20 @@ const router = app.router;
 const state = app.store;
 const event = app.events;
 
-router.init();
-
-state.subscribeKey("todos", () => router.render());
-state.subscribeKey("input", () => router.render());
-state.subscribeKey("editing", () => router.render());
-
 export const useState = (key, initialValue = null) => {
-  if (app.store.get(key) === undefined) {
-    app.store.set({ [key]: initialValue });
+  if (state.get(key) === undefined) {
+    state.set({ [key]: initialValue });
+    state.subscribe(key, () => router.render());
   }
 
-  const value = app.store.get(key);
+  const value = state.get(key);
   const setter = (newValue) => {
-    app.store.set({ [key]: newValue });
+    state.set({ [key]: newValue });
   };
 
   return [value, setter];
 };
 
-export { El, router };
+export { El, router, state };
+
+router.init();
