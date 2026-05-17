@@ -28,8 +28,6 @@ export class Router {
   render() {
     let currentpath = location.hash || "#";
 
-    this.store.set({ filter: currentpath });
-
     let page = this.routes[currentpath] ?? this.routes["#/notfound"];
     
     this.dom.mount(page());
