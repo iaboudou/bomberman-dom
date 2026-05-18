@@ -9,7 +9,7 @@ install() {
 server() {
 
 	echo "Server running at http://localhost:8080"
-	cd $ROOT/server && node src/index.js
+	cd $ROOT/server && node index.js
 }
 
 client() {

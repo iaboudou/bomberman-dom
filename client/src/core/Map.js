@@ -10,7 +10,7 @@
 //   render(el) { }
 // }
 
-const COLS = 15;
+const COLS = 17;
 const ROWS = 13;
 const CELL_SIZE = 64; // px
 

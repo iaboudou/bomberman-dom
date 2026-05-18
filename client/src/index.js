@@ -18,14 +18,9 @@ export const uiDOM = new Dom(document.getElementById("ui"), events);
 
 export { El, store, events, router, useState };
 
-router.register("#", () => WelcomeView());
-router.register("#/lobby", () => LobbyView());
-router.register("#/result", () => ResultView());
-router.register("#/game", () => {
+router.register("#", () => {
   startGame();
   return El("fragment", null);
 });
-
-router.register("#/notfound", () => El("h4", {}, "404"));
 
 router.init();

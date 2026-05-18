@@ -1,7 +1,7 @@
-import { Room } from "./src/models/Room.js";
-import { GameHandler } from "./src/models/GameHandler.js";
+import { Room } from "./src/Room.js";
+import { GameHandler } from "./src/GameHandler.js";
 import { WebSocketServer } from "ws";
-import { Player } from "./src/models/Player.js";
+import { Player } from "./src/Player.js";
 
 function startServer() {
 

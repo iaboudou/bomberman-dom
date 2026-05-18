@@ -1,11 +1,7 @@
 /* globale */
-body {
+* {
   padding: 0;
   margin: 0;
-}
-
-html, body{
-  height: 100vh;
 }
 
 
@@ -19,40 +15,40 @@ html, body{
 
 /* game page */
 
-#main-game {
-  width: 200px;
-  height: 200px;
-  background: red;
+#app {
+  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 800px;
+  padding: 1%;
+  gap: 1%;
 }
 
-#app {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+#ui {
+  border: 2px solid black;
+  width: 850px;
+  /* 17 × 50 */
+  height: 60px;
 }
 
 #map {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  border: 2px solid black;
+  width: 850px;
+  /* 17 × 50 */
+  height: 650px;
+  /* 13 × 50 */
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(15, 12px);
-  grid-template-rows: repeat(13, 12px);
-  width: 960px;
-  height: 832px;
-  margin: auto;
+  grid-template-columns: repeat(17, 50px);
+  grid-template-rows: repeat(13, 50px);
 }
 
 .cell {
-  width: 12px;
-  height: 12px;
+  width: 50px;
+  height: 50px;
 }
 
 .wall {
