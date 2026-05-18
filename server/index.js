@@ -1,32 +1,33 @@
-import { Room } from "./src/Room.js";
-import { GameHandler } from "./src/GameHandler.js";
 import { WebSocketServer } from "ws";
 import { Player } from "./src/Player.js";
+import { startroomgame } from "./src/Room.js";
 
 function startServer() {
+  const { mainRoom, gameHandler } = startroomgame();
 
-  // initialize room Management
-  const rooms = new Map();
-  const mainRoom = new Room("global-1");
-  rooms.set(mainRoom.id, mainRoom);
-
-  // setup game handler for the room
-  const gameHandler = new GameHandler(mainRoom);
-
-  // setup web socket server
   const wss = new WebSocketServer({ port: 8080 });
 
   wss.on("connection", (ws) => {
 
+    const playerId = "P_" + crypto.randomUUID()
+    console.log(playerId)
     let player = null;
+
+    ws.send(JSON.stringify({
+      type: "WELCOME",
+      data: { playerId }
+    }));
 
     // handle client messages
     ws.on("message", (data) => {
+
       try {
         const message = JSON.parse(data);
-        
+
         switch (message.type) {
           case "JOIN":
+            console.log(message.toString())
+            ws.send("hello: " + message.data.toString())
             break;
 
           case "MOVE":
@@ -38,7 +39,7 @@ function startServer() {
           case "CHAT":
             break;
         }
-      } catch{}
+      } catch { }
     });
 
     // handle client disconnection
