@@ -1,0 +1,10 @@
+largeur image : 448
+hauteur image : 240
+largeur d'un block : largeur image / nbr de block
+hauteur d'un block : hauteur image / nbr de block
+
+position du block :
+x = (colonne - 1) × largeur du block 
+y = (ligne - 1) × hauteur du block
+
+background-position : -(x , y)

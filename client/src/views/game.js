@@ -1,24 +1,26 @@
-import { El, Dom, events, useState } from "../../mini-framework/index.js";
-import { generateMap } from "../core/Map.js";
+import { El, Dom, events, useState, router } from "../../mini-framework/index.js";
 import { renderGrid } from "../components/Grid.js";
+import { GameMap } from "../core/Map.js";
+import { map } from "../services/ws.js";
 
 export function GameView() {
+  const gameMap = new GameMap(map.grid, map.tiles);
+
+  const [currentMap, setMap] = useState("map", gameMap, () => {
+    router.render();
+  });
+
   return El(
     "div",
     { id: "app" },
     El("div", { id: "ui" }),
-    El("div", { id: "map" },
-      El("div", { id: "grid" }),
+    El(
+      "div",
+      { id: "map" },
+      renderGrid(currentMap),
       El("div", { id: "players" }),
       El("div", { id: "bombs" }),
-      El("div", { id: "powerups" })
-    )
+      El("div", { id: "powerups" }),
+    ),
   );
-}
-
-export function startGame() {
-  let gridDOM = new Dom(document.getElementById("grid"), events);
-  useState("map", generateMap(), (map) => gridDOM.scheduleMount(renderGrid(map)));
-  // useState("players", [],            (players) => playersDOM.scheduleMount(renderPlayers(players)));
-  // useState("ui",      {},            (ui)      => uiDOM.scheduleMount(renderUI(ui)));
 }

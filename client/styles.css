@@ -4,63 +4,66 @@
   margin: 0;
 }
 
-
-/* welcome page */
-
-
-
-/* lobby page */
-
-
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: aliceblue;
+  background-color: black;
+}
 
 /* game page */
 
 #app {
-  border: 2px solid black;
+  border: 2px solid aliceblue;
   display: flex;
   align-items: center;
   flex-direction: column;
-  height: 800px;
-  padding: 1%;
-  gap: 1%;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 8px;
+  gap: 8px;
 }
 
 #ui {
-  border: 2px solid black;
-  width: 850px;
-  /* 17 × 50 */
+  border: 2px solid aliceblue;
+  width: 816px;
+  /* 17 × 16 × 3*/
   height: 60px;
 }
 
 #map {
-  border: 2px solid black;
-  width: 850px;
-  /* 17 × 50 */
-  height: 650px;
-  /* 13 × 50 */
+  border: 2px solid aliceblue;
+  width: 816px;
+  /* 17 × 16 × 3  */
+  height: 624px;
+  /* 13 × 16 × 3 */
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(17, 50px);
-  grid-template-rows: repeat(13, 50px);
+  grid-template-columns: repeat(17, 48px);
+  grid-template-rows: repeat(13, 48px);
 }
 
 .cell {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  background-image: url('./images/stage.png');
+  background-size: 1344px 720px;
+  /* 448×240 × 3 */
 }
 
 .wall {
-  background: #555;
-}
-
-.block {
-  background: #a0522d;
+  background-position: -96px -48px;
 }
 
 .empty {
-  background: #d4a843;
+  background-position: -144px -96px;
 }
 
-/* result page */
+.block {
+  background-position: -912px -144px;
+}

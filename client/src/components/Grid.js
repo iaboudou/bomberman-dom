@@ -1,26 +1,14 @@
 import { El } from "../../mini-framework/index.js";
-import { CELL } from "../core/Map.js";
 
-export function renderGrid(grid) {
+export function renderGrid(map) {
   return El(
     "div",
     { class: "grid" },
-    ...grid.flat().map((cell, i) =>
+    ...map.grid.flat().map((cell, i) =>
       El("div", {
         key: i,
-        class: cellClass(cell),
+        class: `cell ${map.classes[cell]}`,
       }),
     ),
   );
-}
-
-function cellClass(cell) {
-  switch (cell) {
-    case CELL.WALL:
-      return "cell wall";
-    case CELL.BLOCK:
-      return "cell block";
-    default:
-      return "cell empty";
-  }
 }
