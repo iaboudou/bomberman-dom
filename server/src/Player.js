@@ -1,7 +1,6 @@
 export class Player {
   // initializes a player with ID, nickname, socket, and starting position
-  constructor(id, nickname, socket, x, y) {
-    this.id = id;
+  constructor(nickname, socket, x, y) {
     this.nickname = nickname;
     this.socket = socket;
     this.x = x;

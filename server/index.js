@@ -8,15 +8,7 @@ function startServer() {
   const wss = new WebSocketServer({ port: 8080 });
 
   wss.on("connection", (ws) => {
-
-    const playerId = "P_" + crypto.randomUUID()
-    console.log(playerId)
     let player = null;
-
-    ws.send(JSON.stringify({
-      type: "WELCOME",
-      data: { playerId }
-    }));
 
     // handle client messages
     ws.on("message", (data) => {
@@ -26,8 +18,17 @@ function startServer() {
 
         switch (message.type) {
           case "JOIN":
-            console.log(message.toString())
-            ws.send("hello: " + message.data.toString())
+            console.log("Player JOIN:", message.data);
+            player = new Player(message.data.nickname, ws, 0, 0);
+            const joined = mainRoom.addPlayer(player);
+            if (joined) {
+              ws.send(JSON.stringify({
+                type: "JOIN_SUCCESS",
+                data: { nickname: player.nickname }
+              }));
+            } else {
+              ws.send(JSON.stringify({ type: "ERROR", data: { message: "Room is full" } }));
+            }
             break;
 
           case "MOVE":
