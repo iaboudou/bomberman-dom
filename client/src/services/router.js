@@ -3,13 +3,7 @@ import { ResultView } from "../views/result.js";
 import { WelcomeView } from "../views/welcome.js";
 import { GameView } from "../views/game.js";
 import { router, useState } from "../../mini-framework/index.js";
-import {
-  startWebsocketService,
-  joinGame,
-  sendChatMessage,
-  sendMove,
-  sendBomb,
-} from "./ws.js";
+import { joinGame, sendChatMessage } from "./ws.js";
 
 export function initRouter() {
   router.register("#", () => {

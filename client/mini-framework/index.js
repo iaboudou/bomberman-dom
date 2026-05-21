@@ -17,6 +17,13 @@ export const useState = (key, initialValue = null, onUpdate = null) => {
     store.set({ [key]: initialValue });
   }
   const value = store.get(key);
-  const setter = (newValue) => store.set({ [key]: newValue });
+  const setter = (newValue) => {
+    const resolvedValue = typeof newValue === "function" 
+        ? newValue(store.get(key)) 
+        : newValue;
+
+    store.set({ [key]: resolvedValue })
+  };
+
   return [value, setter];
-};
+}

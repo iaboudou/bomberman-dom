@@ -1,14 +1,12 @@
 export class Player {
-  // initializes a player with ID, nickname, socket, and starting position
   constructor(nickname, socket, x, y) {
     this.nickname = nickname;
     this.socket = socket;
     this.x = x;
     this.y = y;
-    // initialize stats
     this.lives = 3;
-    this.maxBombs = 1;
-    this.bombRange = 1;
+    this.maxBombs = 1;  // number of bombs that can explode continuously
+    this.bombRange = 1; //explosion range of the player's bomb
     this.speed = 1;
   }
 

@@ -1,5 +1,4 @@
-import { store, useState } from "../../mini-framework/index.js";
-import { GameMap } from "../core/Map.js";
+import { useState } from "../../mini-framework/index.js";
 
 let ws = null;
 export const map = {}
@@ -14,7 +13,6 @@ export function startWebsocketService() {
     let message;
     try {
       message = JSON.parse(event.data);
-      console.log(message);
     } catch {
       return;
     }
@@ -22,24 +20,41 @@ export function startWebsocketService() {
     const { type, data } = message;
     switch (type) {
       case "JOIN_SUCCESS": {
-        store.set({
-          nickname: data.nickname,
-          screen: "lobby",
-        });
+        const [, setNickname] = useState("nickname", null, null);
+        const [, setScreen] = useState("screen");
 
+        setNickname(data.nickname);
+        setScreen("lobby");
+
+        const [, setPlayer] = useState("players");
+        setPlayer(data.players);
+        break;
+      }
+
+      case "CHAT": {
+        const [msgslist, setchatMsg] = useState("chatMessages");
+        const list = msgslist
+        setchatMsg([...list, data]);
+        break;
+      }
+
+      case "PLAYERS_UPDATE": {
+        const [, setPlayers] = useState("players");
+        setPlayers(data.players);
         break;
       }
 
       case "MAP_INIT": {
         map.grid = data.grid;
         map.tiles = data.tiles;
-        const [screen, setScreen] = useState("screen");
+        const [, setScreen] = useState("screen");
         setScreen("game");
         break;
       }
 
       case "ERROR": {
-        store.set({ error: data.message });
+        const [, setError] = useState("error", null, null);
+        setError(data.message);
         break;
       }
     }
@@ -56,6 +71,13 @@ export function getMap() {
   ws.send(JSON.stringify({ type: "MAP_INIT" }));
 }
 
-export function sendChatMessage(message) {}
-export function sendMove(direction) {}
-export function sendBomb() {}
+export function sendChatMessage(message) {
+  const [nickname] = useState("nickname");
+  ws.send(JSON.stringify({
+    type: "CHAT",
+    message,
+    nickname,
+  }));
+}
+export function sendMove(direction) { }
+export function sendBomb() { }
