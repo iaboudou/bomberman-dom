@@ -28,13 +28,13 @@ export function startWebsocketService() {
 
         const [, setPlayer] = useState("players");
         setPlayer(data.players);
+        console.log(data.players)
         break;
       }
 
       case "CHAT": {
         const [msgslist, setchatMsg] = useState("chatMessages");
-        const list = msgslist
-        setchatMsg([...list, data]);
+        setchatMsg([...msgslist, data]);
         break;
       }
 
@@ -50,6 +50,21 @@ export function startWebsocketService() {
         const [, setScreen] = useState("screen");
         setScreen("game");
         break;
+      }
+
+      case "WAINTING_OR_COUNTDOWN_TIMER": {
+        const [, setWaitingTime] = useState("waitingTime")
+        const [, setCountDown] = useState("countdown")
+
+        if (data.type == "waitingTime") {
+          setWaitingTime(data.waitingTime)
+          setCountDown(0)
+
+        } else if (data.type == "countdown") {
+          setCountDown(data.waitingTime)
+          setWaitingTime(0)
+
+        }
       }
 
       case "ERROR": {

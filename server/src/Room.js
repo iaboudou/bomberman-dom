@@ -81,7 +81,7 @@ export class Room {
     this.waitingTime = 20;
     this.status = "WAITING";
 
-    gameHandler.broadcastState();
+    gameHandler.broadcastState(this.waitingTime, "waitingTime");
 
     this.setInterval_waitingTimer = setInterval(() => {
       if (this.players.length < 2) {
@@ -98,7 +98,7 @@ export class Room {
         this.startCountdown();
       } else {
         this.waitingTime--;
-        gameHandler.broadcastState();
+        gameHandler.broadcastState(this.waitingTime, "waitingTime");
       }
     }, 1000);
   }
@@ -110,7 +110,7 @@ export class Room {
     this.status = "COUNTDOWN";
     this.countdown = 10;
 
-    gameHandler.broadcastState();
+    gameHandler.broadcastState(this.countdown, "countdown");
 
     this.setInterval_countdownTimer = setInterval(() => {
       if (this.players.length < 2) {
@@ -118,7 +118,7 @@ export class Room {
         this.setInterval_countdownTimer = null;
         this.status = "WAITING";
         this.countdown = 0;
-        gameHandler.broadcastState();
+        gameHandler.broadcastState(this.countdown), "countdown";
         return;
       }
 
@@ -130,7 +130,7 @@ export class Room {
         gameHandler.startGame();
       } else {
         this.countdown--;
-        gameHandler.broadcastState();
+        gameHandler.broadcastState(this.countdown, "countdown");
       }
     }, 1000);
   }
