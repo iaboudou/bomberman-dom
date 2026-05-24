@@ -1,4 +1,5 @@
 import { El, useState, router } from "../../mini-framework/index.js";
+import { sendResetGame } from "../services/ws.js";
 import { playerColor } from "./game.js";
 
 export function ResultView() {
@@ -16,19 +17,21 @@ export function ResultView() {
 
     !isDraw
       ? El("div", {
-          class: "winner-card",
-          style: `--player-color: ${playerColor(winner.nickname)}`
-        },
-          El("div", { class: "winner-avatar" }, winner.nickname[0].toUpperCase()),
-          El("span", { class: "winner-nickname" }, winner.nickname),
-          El("span", { class: "winner-label" }, "WINNER")
-        )
+        class: "winner-card",
+        style: `--player-color: ${playerColor(winner.nickname)}`
+      },
+        El("div", { class: "winner-avatar" }, winner.nickname[0].toUpperCase()),
+        El("span", { class: "winner-nickname" }, winner.nickname),
+        El("span", { class: "winner-label" }, "WINNER")
+      )
       : El("p", {}, "Everyone died in the explosion."),
 
     El("button", {
       class: "result-btn",
       style: `--player-color: ${isWinner ? playerColor(nickname) : "aliceblue"}`,
-      onclick: () => {}
+      onclick: () => {
+        sendResetGame();
+      }
     }, "PLAY AGAIN"),
   );
 }

@@ -25,6 +25,8 @@ body {
   margin: 0 auto;
   padding: 8px;
   gap: 8px;
+    /* width: 820px;
+  min-height: 640px; */
 }
 
 #ui {

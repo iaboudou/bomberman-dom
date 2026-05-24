@@ -7,10 +7,4 @@ export class Bomb {
     this.range = range;
     this.isExploded = false;
   }
-
-  // triggers the explosion
-  explode() { }
-
-  // returns a Virtual DOM representation of the bomb or explosion
-  render(el) { }
 }

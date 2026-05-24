@@ -1,90 +1,97 @@
 import { collectPowerUp, spawnPowerUp } from "./PowerUp.js";
 
+// used to announce new player to the one who joined
 export const sendJoinSuccess = (socket, players, newPlayer, messages) => {
-    socket.send(
+  socket.send(
     JSON.stringify({
       type: "JOIN_SUCCESS",
       data: {
         nickname: newPlayer.nickname,
         players: players.map(p => p.nickname),
-        messages : messages,
+        messages: messages,
       },
     }),
   );
 }
 
+// used to announce new player to the others
 export const broadcastNewPlayer = (players, newPlayer) => {
-    players.forEach((p)=> {
+  players.forEach((p) => {
     if (p.nickname === newPlayer.nickname) return
-    
+
     p.socket.send(
       JSON.stringify({
-        type : "NEW_PLAYER",
-        data : {newPlayer : newPlayer.nickname}
+        type: "NEW_PLAYER",
+        data: { newPlayer: newPlayer.nickname }
       })
     )
   })
 }
 
-export const broadCastPlayerLeft = (players,playerLeft) => {
-players.forEach((p) => {
-if (p.socket && p.socket.readyState === 1)
-    p.socket.send(JSON.stringify({
-     type: "PLAYER_LEFT",
-     data : {left : playerLeft,}
-  }));
-});
+// used to announce player left to the others
+export const broadCastPlayerLeft = (players, playerLeft) => {
+  players.forEach((p) => {
+    if (p.socket && p.socket.readyState === 1)
+      p.socket.send(JSON.stringify({
+        type: "PLAYER_LEFT",
+        data: { left: playerLeft, }
+      }));
+  });
 }
 
-export const sendRoomIsFull = (socket)=> {
-socket.send(
-  JSON.stringify({
-    type: "ERROR",
-    data: { message: "Room is full" },
-  }),
-);
+// used to announce no more place in the room to the one who tried to join
+export const sendRoomIsFull = (socket) => {
+  socket.send(
+    JSON.stringify({
+      type: "ERROR",
+      data: { message: "Room is full" },
+    }),
+  );
 }
 
+// used to reset the timers and the room status when switching to game map
 export const removeAllTimer = (ROOM) => {
-if (ROOM.setInterval_waitingTimer) {
-  clearInterval(ROOM.setInterval_waitingTimer);
-  ROOM.setInterval_waitingTimer = null;
-}
-if (ROOM.setInterval_countdownTimer) {
-  clearInterval(ROOM.setInterval_countdownTimer);
-  ROOM.setInterval_countdownTimer = null;
-}
-ROOM.waitingTime = 0;
-ROOM.countdown = 0;
-ROOM.status = "INGAME";
-      
-}
-
-export const sendMapInfo = (players, map) => {
-players.forEach((p) => {
-  if (p.socket && p.socket.readyState === 1) {
-    p.socket.send(JSON.stringify({
-      type: "MAP_INIT",
-      data: {
-        grid: map.grid,
-        tiles: map.TILES,
-        classes : map.classes,
-        players: players.map((player) => ({
-          id: player.id,
-          nickname: player.nickname,
-          x: player.x,
-          y: player.y,
-          direction: player.direction,
-          remaininglife: player.remaininglife,
-          maxlife: player.maxlife,
-        })),
-      },
-    }));
+  if (ROOM.setInterval_waitingTimer) {
+    clearInterval(ROOM.setInterval_waitingTimer);
+    ROOM.setInterval_waitingTimer = null;
   }
-});
+  if (ROOM.setInterval_countdownTimer) {
+    clearInterval(ROOM.setInterval_countdownTimer);
+    ROOM.setInterval_countdownTimer = null;
+  }
+  ROOM.waitingTime = 0;
+  ROOM.countdown = 0;
+  ROOM.status = "INGAME";
 
 }
 
+// used to send the map info to all players when switching to game map
+export const sendMapInfo = (players, map) => {
+  players.forEach((p) => {
+    if (p.socket && p.socket.readyState === 1) {
+      p.socket.send(JSON.stringify({
+        type: "MAP_INIT",
+        data: {
+          grid: map.grid,
+          tiles: map.TILES,
+          classes: map.classes,
+          players: players.map((player) => ({
+            id: player.id,
+            nickname: player.nickname,
+            x: player.x,
+            y: player.y,
+            direction: player.direction,
+            remaininglife: player.remaininglife,
+            maxlife: player.maxlife,
+          })),
+        },
+      }));
+    }
+  });
+
+}
+
+// try to moove the player in the given direction, if possible, then announce it to all players
 export const MoovePlayer = (direction, player, map, ROOM) => {
   if (!player || !player.canMove()) return;
 
@@ -113,14 +120,15 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
             x: player.x,
             y: player.y,
             direction: player.direction,
-        ...(powerupsChanged && { powerups: ROOM.powerups }),
-        },
-      }));
-    }
-  });
-}
+            ...(powerupsChanged && { powerups: ROOM.powerups }),
+          },
+        }));
+      }
+    });
+  }
 };
 
+// handle the bomb explosion, update the map and the players accordingly, then announce it to all players
 export const triggerExplosion = (bomb, map, ROOM) => {
   const cellsAffected = bomb.explode(map);
   const removedBlocks = [];

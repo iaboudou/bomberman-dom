@@ -10,10 +10,4 @@ export class Player {
     this.lives = 3;
     this.speed = 1;
   }
-
-  // changes player position
-  move(direction) { }
-
-  // returns a Virtual DOM representation of the player
-  render(el) { }
 }

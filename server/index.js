@@ -33,7 +33,7 @@ function startServer() {
 
             } else {
               sendRoomIsFull(ws)
-            }         
+            }
 
             player = newPlayer
             break;
@@ -52,13 +52,13 @@ function startServer() {
           }
 
           case "MOVE": {
-              if (ROOM.spectators.some(s => s.id === player?.id)) break;
+            if (ROOM.spectators.some(s => s.id === player?.id)) break;
             MoovePlayer(message.data.direction, player, map, ROOM)
             break;
           }
 
           case "BOMB": {
-              if (ROOM.spectators.some(s => s.id === player?.id)) break;
+            if (ROOM.spectators.some(s => s.id === player?.id)) break;
             if (!player.canPlaceBomb()) break;
 
             const bomb = new Bomb(player.x, player.y, player.range);
@@ -69,8 +69,8 @@ function startServer() {
 
             const everyone = [...ROOM.players, ...ROOM.spectators];
             everyone.forEach((p) => {
-            if (p.socket && p.socket.readyState === 1) {
-              p.socket.send(JSON.stringify({
+              if (p.socket && p.socket.readyState === 1) {
+                p.socket.send(JSON.stringify({
                   type: "BOMB_PLACED",
                   data: { bomb },
                 }));
@@ -78,15 +78,44 @@ function startServer() {
             });
 
             setTimeout(() => {
-              player.activeBombs --;
+              player.activeBombs--;
               triggerExplosion(bomb, map, ROOM)
             }, bomb.duration);
 
             break;
           }
+
+          case "RESET_GAME": {
+            removeAllTimer(ROOM);
+            map = new GameMap();
+            map.generateBlock();
+            const allPlayers = [...ROOM.players, ...ROOM.spectators];
+            ROOM.spectators = [];
+            ROOM.players = allPlayers.map((p, i) => {
+              const spawn = spawnPoints[i];
+              p.x = spawn.x;
+              p.y = spawn.y;
+              p.direction = "down";
+              p.maxBombs = 1;
+              p.activeBombs = 0;
+              p.range = 2;
+              p.maxlife = 3;
+              p.remaininglife = 3;
+              p.speed = 1;
+              p._lastMove = 0;
+              return p;
+            });
+
+            ROOM.bombs = [];
+            ROOM.powerups = [];
+            ROOM.map = map;
+
+            sendMapInfo(ROOM.players, map);
+            break;
+          }
         }
       } catch (err) {
-      console.error("WebSocket message error:", err);
+        console.error("WebSocket message error:", err);
       }
     });
 
