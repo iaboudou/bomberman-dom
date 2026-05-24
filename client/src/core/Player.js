@@ -1,8 +1,7 @@
 export class Player {
   // Creates a new player with coordinates and nickname
-  constructor(id, nickname, x, y) {
-    // initialize player ID and name
-    this.id = id;
+  constructor(nickname, x, y) {
+    // initialize player name
     this.nickname = nickname;
     // set initial grid position (x, y)
     this.x = x;

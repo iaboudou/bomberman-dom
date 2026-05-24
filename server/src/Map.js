@@ -1,15 +1,14 @@
 export class GameMap {
   // Initializes the server-side map with dimensions and a grid
-  constructor(density = 0.4) {
-    this.density = density;
-    this.grid = this.generateGrid();
+  constructor() {
+    this.TILES = { empty: 0, wall: 1, block: 2 };
+    this.DEFAULT_DENSITY = 0.7;
+    this.grid = this.DEFFAULT_GRID();
   }
 
-  // Generates the initial game grid with walls and blocks
-  // 0 : empty
-  // 1 : wall
-  // 2 : block
-  generateGrid() {
+  // Generates the initial game grid with walls
+  // for easier readability, we left number but we could totaly use tiles methods
+  DEFFAULT_GRID() {
     return [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -36,7 +35,7 @@ export class GameMap {
     this.grid = grid.map((line, row) => {
       return line.map((cell, col) => {
         if (cell === 0 && !this.isInSpawnZone(row, col, ROWS, COLS)) {
-          return Math.random() < this.density ? 2 : 0;
+          return Math.random() < this.DEFAULT_DENSITY ? this.TILES.block : this.TILES.empty;
         }
         return cell;
       });
@@ -45,31 +44,36 @@ export class GameMap {
 
   //check if the current position is within the corners
   isInSpawnZone(currentRow, currentCol, maxRow, maxCol) {
+    const r = maxRow - 1;
+    const c = maxCol - 1;
+
     return (
       // top left
       (currentRow === 1 && currentCol === 1) ||
       (currentRow === 1 && currentCol === 2) ||
       (currentRow === 2 && currentCol === 1) ||
       // top right
-      (currentRow === 1 && currentCol === maxCol) ||
-      (currentRow === 1 && currentCol === maxCol - 1) ||
-      (currentRow === 2 && currentCol === maxCol) ||
+      (currentRow === 1 && currentCol === c) ||
+      (currentRow === 1 && currentCol === c - 1) ||
+      (currentRow === 2 && currentCol === c) ||
       // bottom left
-      (currentRow === maxRow && currentCol === 1) ||
-      (currentRow === maxRow - 1 && currentCol === 1) ||
-      (currentRow === maxRow && currentCol === 2) ||
+      (currentRow === r && currentCol === 1) ||
+      (currentRow === r - 1 && currentCol === 1) ||
+      (currentRow === r && currentCol === 2) ||
       // bottom right
-      (currentRow === maxRow && currentCol === maxCol) ||
-      (currentRow === maxRow - 1 && currentCol === maxCol) ||
-      (currentRow === maxRow && currentCol === maxCol - 1)
+      (currentRow === r && currentCol === c) ||
+      (currentRow === r - 1 && currentCol === c) ||
+      (currentRow === r && currentCol === c - 1)
     );
   }
 
   // Checks if a specific tile (x, y) is empty and walkable
   isWalkable(row, col) {
-    return this.grid[row][col] === 0;
+    return this.grid[row][col] === this.TILES.empty;
   }
 
   // Removes a destructible block from the grid (after explosion)
-  removeBlock(row, col) {}
+  removeBlock(row, col) {
+    this.grid[row][col] = this.TILES.empty;
+  }
 }

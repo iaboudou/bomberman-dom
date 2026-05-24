@@ -1,7 +1,7 @@
 export class Bomb {
   // initializes a bomb with its owner and explosion range
-  constructor(ownerId, x, y, range) {
-    this.ownerId = ownerId;
+  constructor(id, x, y, range) {
+    this.id = id;
     this.x = x;
     this.y = y;
     this.range = range;

@@ -1,18 +1,45 @@
 export class Player {
   constructor(nickname, socket, x, y) {
-    this.nickname = nickname;
+    this.id = crypto.randomUUID();
     this.socket = socket;
+    this.nickname = nickname;
     this.x = x;
     this.y = y;
-    this.lives = 3;
-    this.maxBombs = 1;  // number of bombs that can explode continuously
-    this.bombRange = 1; //explosion range of the player's bomb
+    this.direction = "down";
+    this.maxBombs = 1;
+    this.activeBombs = 0;
+    this.range = 2;
+    this.maxlife = 3;
+    this.remaininglife = 3;
     this.speed = 1;
+    this._lastMove = 0;
   }
 
-  // Updates the player's position
-  updatePosition(newX, newY) { }
+  moove(x, y, direction) {
+    this.x = x;
+    this.y = y;
+    this.direction = direction;
+  }
 
-  // do -1 player's lives, if lives == 0, kill the player
-  takeDamage() { }
+  canMove() {
+    const cooldown = 200 / this.speed; // speed 1 = 200ms, speed 2 = 100ms
+    return Date.now() - this._lastMove >= cooldown;
+  }
+
+  registerMove() {
+    this._lastMove = Date.now();
+  }
+
+  canPlaceBomb() {
+    return this.activeBombs < this.maxBombs;
+  }
+
+  loseLife() {
+    this.remaininglife--;
+  }
+
+  isDead() {
+    return this.remaininglife <= 0;
+  }
+
 }

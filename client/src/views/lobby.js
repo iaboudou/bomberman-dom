@@ -1,5 +1,5 @@
 import { El, store, useState, router } from "../../mini-framework/index.js";
-import { getMap } from "../services/ws.js";
+import { getMap, sendSwitchToGameMap } from "../services/ws.js";
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView(props) {
@@ -32,86 +32,86 @@ export function LobbyView(props) {
     }
   }
 
- return El(
-  "div",
-  { class: "lobby-screen" },
-  El(
+  return El(
     "div",
-    { class: "lobby-container" },
-
+    { class: "lobby-screen" },
     El(
       "div",
-      {},
-      El("h1", {}, "Waiting for Players"),
-      El("p", {}, `Players: ${playersList.length}/4`),
-      (waitingTime > 0 && playersList.length >= 2) || countdown > 0
-        ? El("p", { class: "status-label" },  (waitingTime > 0 && playersList.length >= 2)? "Waiting time" : "Game starts in " )
-        : null,
-      waitingTime > 0 && playersList.length >= 2
-        ? El("div", { class: "status-box" }, `${waitingTime}s`)
-        : null,
-      countdown > 0 ? El("div", { class: "status-box" }, `${countdown}s`) : null,
-      playersList.length < 2
-        ? El("p", {}, "Waiting for more players to join...")
-        : null,
+      { class: "lobby-container" },
+
       El(
         "div",
-        { class: "players-list" },
-        El("h3", {}, "Connected Players"),
-        ...(playersList || []).map((player) =>
-          El(
-            "div",
-            { class: "player-item" },
-            El("span", {}),
-            ` ${player}`,
+        {},
+        El("h1", {}, "Waiting for Players"),
+        El("p", {}, `Players: ${playersList.length}/4`),
+        (waitingTime > 0 && playersList.length >= 2) || countdown > 0
+          ? El("p", { class: "status-label" }, (waitingTime > 0 && playersList.length >= 2) ? "Waiting time" : "Game starts in ")
+          : null,
+        waitingTime > 0 && playersList.length >= 2
+          ? El("div", { class: "status-box" }, `${waitingTime}s`)
+          : null,
+        countdown > 0 ? El("div", { class: "status-box" }, `${countdown}s`) : null,
+        playersList.length < 2
+          ? El("p", {}, "Waiting for more players to join...")
+          : null,
+        El(
+          "div",
+          { class: "players-list" },
+          El("h3", {}, "Connected Players"),
+          ...(playersList || []).map((player) =>
+            El(
+              "div",
+              { class: "player-item" },
+              El("span", {}),
+              ` ${player}`,
+            ),
           ),
         ),
       ),
-    ),
 
-    El("div", {}),
+      El("div", {}),
 
-    El(
-      "div",
-      {},
-      El("h3", {}, "Lobby Chat"),
       El(
         "div",
-        { class: "chat-messages" },
-        ...chatMessages
-          .slice(-20)
-          .map((msg) =>
-            El(
-              "div",
-              { class: "chat-message" },
-              El("strong", { class: "chat-author" }, `${msg.nickname}`),
-              El("span", { class: "chat-text" }, msg.message),
+        {},
+        El("h3", {}, "Lobby Chat"),
+        El(
+          "div",
+          { class: "chat-messages" },
+          ...chatMessages
+            .slice(-20)
+            .map((msg) =>
+              El(
+                "div",
+                { class: "chat-message" },
+                El("strong", { class: "chat-author" }, `${msg.nickname}`),
+                El("span", { class: "chat-text" }, msg.message),
+              ),
             ),
-          ),
-      ),
-      El(
-        "form",
-        { onsubmit: handleChatSubmit },
-        El("input", {
-          type: "text",
-          name: "message",
-          class: "chat-input",
-          placeholder: "Type a message...",
-          maxlength: "100",
-          required: true,
-        }),
-        El("button", { type: "submit" }, "Send"),
-      ),
-      El(
-        "button",
-        {
-          onclick: () => {
-            getMap();
+        ),
+        El(
+          "form",
+          { onsubmit: handleChatSubmit },
+          El("input", {
+            type: "text",
+            name: "message",
+            class: "chat-input",
+            placeholder: "Type a message...",
+            maxlength: "100",
+            required: true,
+          }),
+          El("button", { type: "submit" }, "Send"),
+        ),
+        El(
+          "button",
+          {
+            onclick: () => {
+              sendSwitchToGameMap();
+            },
           },
-        },
-        "start game",
+          "start game",
+        ),
       ),
     ),
-  ),
-);
+  );
 }

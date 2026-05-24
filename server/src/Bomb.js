@@ -1,15 +1,42 @@
+import { randomUUID } from "crypto";
+
 export class Bomb {
-  // Initializes a bomb with position, range, and owner
-  constructor(x, y, range, playerId) {
+  constructor(x, y, range = 1) {
+    this.id = randomUUID();
     this.x = x;
     this.y = y;
     this.range = range;
-    this.playerId = playerId;
+    this.duration = 1500;
   }
 
-  // Starts the explosion countdown
-  startTimer(onExplode) { }
+  explode(map) {
+    const cells = [{ x: this.x, y: this.y }];
 
-  // Calculates the affected tiles based on range and map
-  getExplosionArea(map) { }
+    const directions = [
+      { dx: 0, dy: -1 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 },
+      { dx: 1, dy: 0 },
+    ];
+
+    for (const { dx, dy } of directions) {
+      for (let i = 1; i <= this.range; i++) {
+        const nx = this.x + dx * i;
+        const ny = this.y + dy * i;
+
+        if (!map.grid[ny] || map.grid[ny][nx] === undefined) break;
+
+        if (!map.isWalkable(ny, nx)) {
+          if (map.grid[ny][nx] === map.TILES.block) {
+            cells.push({ x: nx, y: ny });
+          }
+          break;
+        }
+
+        cells.push({ x: nx, y: ny });
+      }
+    }
+
+    return cells;
+  }
 }
