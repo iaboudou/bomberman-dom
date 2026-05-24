@@ -1,6 +1,5 @@
 import { El, Dom, events, useState, router } from "../../mini-framework/index.js";
-import { renderGrid } from "../components/Grid.js";
-import { GameMap } from "../core/Map.js";
+import { GameMap } from "../entities/Map.js";
 import { map, sendMove, sendBomb, ws } from "../services/ws.js";
 
 export const playerColor = (nickname) => {
@@ -14,27 +13,21 @@ export const playerColor = (nickname) => {
 export function GameView() {
   const gameMap = new GameMap(map.grid, map.tiles);
 
-  const [Map, setMap] = useState("map", gameMap, () => {
-    router.render();
-  });
+  const [Map, setMap] = useState("map", gameMap);
+  
   const [currentPlayer] = useState("currentPlayer");
   const [players] = useState("players");
-  if (!currentPlayer || !players || !gameMap) return router.navigate("#");
-  if (players.length === 1) {
-    // useState("winner", players[0])
-    // const [, setScreen] = useState("screen")
-    // setScreen("result")
-    return
-  }
+  const [screen, setScreen] = useState("screen", "welcome");
 
   const [bombs] = useState("bombs", []);
   const [powerups] = useState("powerups", []);
-
-
+  const [isSpectator] = useState("spectator", false);
 
   const handleMove = (e) => {
+    if (isSpectator) return;
+    e.preventDefault();
+
     if (e.key === " ") {
-      e.preventDefault();
       sendBomb();
       return;
     }
@@ -42,7 +35,6 @@ export function GameView() {
     const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
     if (validKeys.includes(e.key)) {
-      e.preventDefault();
       sendMove(e.key);
     }
   };
@@ -54,12 +46,23 @@ export function GameView() {
       id: "app",
       tabindex: "0",
       autofocus: true,
-      onKeydown: (e) => handleMove(e, currentPlayer),
+      onKeydown: (e) => handleMove(e),
     },
-    El(
-      "div",
-      { id: "ui" }
-    ),
+   El(
+  "div",
+  { id: "ui" },
+  El("div", { class: "ui-players" },
+    players.map((p) =>
+      El("div", { class: "ui-player", style: `--player-color: ${playerColor(p.nickname)}` },
+        El("span", { class: "ui-avatar" }, p.nickname[0].toUpperCase()),
+        El("div", { class: "ui-lives" },
+          Array.from({ length: p.maxlife }, (_, i) =>
+            El("span", { class: `ui-heart ${i < p.remaininglife ? "alive" : "lost"}` }, "♥")
+          )
+        )
+      )
+    )
+  )),
     El(
       "div",
       { id: "map" },

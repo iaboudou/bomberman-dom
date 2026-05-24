@@ -28,14 +28,47 @@ body {
 }
 
 #ui {
-  border: 2px solid aliceblue;
-  width: 816px;
-  /* 17 × 16 × 3*/
-  height: 60px;
   display: flex;
-  gap: 12px;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #1a1a2e;
 }
+
+.ui-players {
+  display: flex;
+  gap: 16px;
+}
+
+.ui-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ui-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--player-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+.ui-lives {
+  display: flex;
+  gap: 2px;
+}
+
+.ui-heart {
+  font-size: 14px;
+}
+
+.ui-heart.alive  { color: #e74c3c; }
+.ui-heart.lost   { color: #444; }
 
 #map {
   border: 2px solid aliceblue;

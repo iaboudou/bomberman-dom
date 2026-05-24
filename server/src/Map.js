@@ -1,29 +1,16 @@
+import { DEFAULT_DENSITY, DEFAULT_GRID, TILES } from "./Const.js";
+
 export class GameMap {
   // Initializes the server-side map with dimensions and a grid
   constructor() {
-    this.TILES = { empty: 0, wall: 1, block: 2 };
-    this.DEFAULT_DENSITY = 0.7;
-    this.grid = this.DEFFAULT_GRID();
-  }
-
-  // Generates the initial game grid with walls
-  // for easier readability, we left number but we could totaly use tiles methods
-  DEFFAULT_GRID() {
-    return [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ];
+    this.TILES = TILES;
+    this.blockProbability = DEFAULT_DENSITY;
+    this.grid = DEFAULT_GRID;
+     this.classes = {
+      [TILES.empty]: "empty",
+      [TILES.wall]: "wall",
+      [TILES.block]: "block",
+    };
   }
 
   // Generates random destructible blocks where it can be
@@ -35,7 +22,7 @@ export class GameMap {
     this.grid = grid.map((line, row) => {
       return line.map((cell, col) => {
         if (cell === 0 && !this.isInSpawnZone(row, col, ROWS, COLS)) {
-          return Math.random() < this.DEFAULT_DENSITY ? this.TILES.block : this.TILES.empty;
+          return Math.random() < this.blockProbability ? this.TILES.block : this.TILES.empty;
         }
         return cell;
       });

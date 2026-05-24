@@ -4,26 +4,21 @@ import { Store } from "./store.js";
 import { Router } from "./router.js";
 
 const events = new Events();
-const store  = new Store();
-const dom    = new Dom(document.body, events);
+const store = new Store();
+const dom = new Dom(document.body, events);
 const router = new Router(dom, store);
-const El     = dom.el.bind(dom);
+const El = dom.el.bind(dom);
 
 export { Dom, events, store, router, El };
 
-export const useState = (key, initialValue = null, onUpdate = null) => {
+export const useState = (key, initialValue = null) => {
   if (store.get(key) === undefined) {
-    if (onUpdate) store.subscribe(key, onUpdate);
     store.set({ [key]: initialValue });
+    store.subscribe(key, () => router.render());
   }
   const value = store.get(key);
-  const setter = (newValue) => {
-    const resolvedValue = typeof newValue === "function" 
-        ? newValue(store.get(key)) 
-        : newValue;
-
-    store.set({ [key]: resolvedValue })
-  };
-
+  const setter = (newValue) => store.set({ [key]: newValue });
   return [value, setter];
-}
+};
+
+router.register("#/notfound", () => El("div", null, "404 Page not found"));

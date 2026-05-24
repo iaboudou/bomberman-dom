@@ -19,15 +19,12 @@ export class Player {
     this.x = x;
     this.y = y;
     this.direction = direction;
+    this._lastMove = Date.now();
   }
 
   canMove() {
     const cooldown = 200 / this.speed; // speed 1 = 200ms, speed 2 = 100ms
     return Date.now() - this._lastMove >= cooldown;
-  }
-
-  registerMove() {
-    this._lastMove = Date.now();
   }
 
   canPlaceBomb() {

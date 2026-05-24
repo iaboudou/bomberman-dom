@@ -1,5 +1,5 @@
 import { useState, store, router } from "../../mini-framework/index.js";
-import { Player } from "../core/Player.js";
+import { Player } from "../entities/Player.js";
 
 export let ws = null;
 export const map = {}
@@ -9,6 +9,10 @@ export function startWebsocketService() {
   ws.onopen = () => {
     console.log("connected to the ws");
   };
+
+  ws.onerror = (err) => {
+    console.log(err)
+  }
 
   ws.onmessage = (event) => {
     let message;
@@ -21,14 +25,13 @@ export function startWebsocketService() {
     const { type, data } = message;
     switch (type) {
       case "JOIN_SUCCESS": {
-        const [, setNickname] = useState("nickname", null, null);
-        const [, setScreen] = useState("screen");
+        useState("nickname", data.nickname);
+        useState("players", data.players);
+        useState("chatMessages", data.messages);
 
-        setNickname(data.nickname);
+        const [, setScreen] = useState("screen");
         setScreen("lobby");
 
-        const [, setPlayer] = useState("players");
-        setPlayer(data.players);
         break;
       }
 
@@ -38,44 +41,55 @@ export function startWebsocketService() {
         break;
       }
 
-      case "PLAYERS_UPDATE": {
-        const [, setPlayers] = useState("players");
-        setPlayers(data.players);
+      case "NEW_PLAYER" : {
+        const [players, setPlayers] = useState("players");
+        setPlayers([...players, data.newPlayer])
+        break
+      }
+
+      case "PLAYER_LEFT": {
+        const [players, setPlayers] = useState("players");
+        setPlayers(players.filter(p => p !== data.left));
         break;
       }
 
-      case "PLAYERS_STATE": {
-        console.log("PLAYERS_STATE", data);
-        const [, setPlayers] = useState("players", []);
-        setPlayers(data.players);
+      case "PLAYER_MOVED": {
+      const [players, setPlayers] = useState("players", []);
+  
+      const updated = players.map((p) =>
+        p.id === data.id ? { ...p, x: data.x, y: data.y, direction: data.direction }: p
+      );
 
-        const [, setPowerups] = useState("powerups", []);
-        setPowerups(data.powerups || []);
-        router.render();
-        break;
+      setPlayers(updated);
+
+      if (data.powerups) {
+        const [, setPowerups] = useState("powerups");
+        setPowerups(data.powerups);
+      }
+
+      break;
       }
 
       case "MAP_INIT": {
+        const [nickname] = useState("nickname");
+        const [, setPlayers] = useState("players");
+        const [, setCurrentPlayer] = useState("currentPlayer");
+        const [, setScreen] = useState("screen");
+        
         map.grid = data.grid;
         map.tiles = data.tiles;
+        map.classes = data.classes;
 
-        const [, setPlayers] = useState("players");
         setPlayers(data.players);
-
-        const [nickname] = useState("nickname");
         const currentPlayer = data.players.find((p) => p.nickname === nickname);
-
-        const [, setCurrentPlayer] = useState("currentPlayer");
         setCurrentPlayer(currentPlayer);
 
-        const [, setScreen] = useState("screen");
         setScreen("game");
-
         break;
       }
 
       case "WAINTING_OR_COUNTDOWN_TIMER": {
-        console.log("timer data", data);
+
         const [, setWaitingTime] = useState("waitingTime")
         const [, setCountDown] = useState("countdown")
         if (data.type == "waitingTime") {
@@ -97,32 +111,53 @@ export function startWebsocketService() {
       case "BOMB_PLACED": {
         const [bombs, setBombs] = useState("bombs", []);
         setBombs([...bombs, data.bomb]);
-        router.render();
         break;
       }
 
       case "BOMB_EXPLODED": {
-        map.grid = data.grid;
+        const [bombs, setBombs] = useState("bombs", []);
+        setBombs(bombs.filter((b) => b.id !== data.bombId));
 
         const [currentMap, setMap] = useState("map");
-        if (currentMap) {
-          currentMap.grid = data.grid;
-          setMap(currentMap);
-        }
+          if (data.removedBlocks.length > 0) {
+            data.removedBlocks.forEach(({ x, y }) => {
+            currentMap.grid[y][x] = map.tiles.empty
+          });
 
-        const [, setBombs] = useState("bombs", []);
-        setBombs(data.bombs);
-
-        const [, setPlayers] = useState("players", []);
-        setPlayers(data.players);
-
-        const [, setPowerups] = useState("powerups", []);
-        setPowerups(data.powerups || []);
-
-        router.render();
-        break;
+        setMap(currentMap);
       }
 
+      if (data.spawnedPowerups.length > 0) {
+        const [powerups, setPowerups] = useState("powerups", []);
+        setPowerups([...powerups, ...data.spawnedPowerups]);
+      }
+
+      const [players, setPlayers] = useState("players", []);
+      const updated = players
+      .filter((p) => !data.deadPlayers.includes(p.id))
+      .map((p) => {
+        const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
+        return hit ? { ...p, remaininglife: hit.remaininglife } : p;
+      });
+
+      setPlayers(updated);
+      
+      break;
+      }
+
+      case "YOU_DIED": {
+        const [, setSpectator] = useState("spectator", false);
+        setSpectator(true);
+       break;
+      }
+
+      case "GAME_OVER": {
+        const [, setWinner] = useState("winner", null);
+        setWinner(data.winner);
+        const [, setScreen] = useState("screen");
+        setScreen("result");
+        break;
+      }
 
       case "ERROR": {
         const [, setError] = useState("error", null, null);

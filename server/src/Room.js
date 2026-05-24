@@ -17,6 +17,7 @@ export class Room {
     this.setInterval_countdownTimer = null;
     this.createdAt = Date.now();
     this.chatHandler = new ChatHandler(this);
+    this.spectators = [];
   }
 
   // add new player to the room
@@ -42,8 +43,8 @@ export class Room {
   }
 
   // remove the player from the room in case of disconnect
-  removePlayer(playerId) {
-    this.players = this.players.filter(p => p.nickname !== playerId);
+  removePlayer(playerName) {
+    this.players = this.players.filter(p => p.nickname !== playerName);
 
     if (this.players.length < 2) {
       if (this.setInterval_waitingTimer) {

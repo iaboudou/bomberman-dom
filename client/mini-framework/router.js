@@ -30,7 +30,7 @@ export class Router {
 
     let page = this.routes[currentpath] ?? this.routes["#/notfound"];
     
-    this.dom.mount(page());
+    this.dom.scheduleMount(page());
   }
 
   // allows you to register a new route by associating a path with a handler function.

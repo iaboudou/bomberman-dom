@@ -1,12 +1,6 @@
 import { El, useState, router, Dom, events } from "../../mini-framework/index.js";
 
 export function WelcomeView(props) {
-    const appDiv = document.getElementById("app");
-    if (appDiv) {
-        const appDOM = new Dom(appDiv, events);
-        appDOM.mount(null);
-    }
-
     // State to manage error messages
     const [error, setError] = useState("error", null, () => {router.render()});
 

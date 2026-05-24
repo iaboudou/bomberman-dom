@@ -7,7 +7,7 @@ import { joinGame, sendChatMessage } from "./ws.js";
 
 export function initRouter() {
   router.register("#", () => {
-    const [screen] = useState("screen", "welcome", () => router.render());
+    const [screen] = useState("screen", "welcome");
     switch (screen) {
       case "welcome":
         return WelcomeView({ onJoin: joinGame });
