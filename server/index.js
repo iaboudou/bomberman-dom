@@ -10,6 +10,7 @@ function startServer() {
   const { ROOM, gameHandler } = startroomgame();
   let map = new GameMap();
   map.generateBlock();
+  ROOM.map = map;
 
   const wss = new WebSocketServer({ port: 8080 });
 
@@ -102,6 +103,7 @@ function startServer() {
             removeAllTimer(ROOM);
             map = new GameMap();
             map.generateBlock();
+            ROOM.map = map;
             const allPlayers = [...ROOM.players, ...ROOM.spectators];
             ROOM.spectators = [];
             ROOM.players = allPlayers.map((p, i) => {
@@ -121,8 +123,6 @@ function startServer() {
 
             ROOM.bombs = [];
             ROOM.powerups = [];
-            ROOM.map = map;
-
             sendMapInfo(ROOM.players, map);
             break;
           }

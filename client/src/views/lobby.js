@@ -3,10 +3,14 @@ import { sendSwitchToGameMap } from "../services/ws.js";
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView(props) {
-  const [waitingTime] = useState("waitingTime", 0); // waiting time before game starts (after 2 players joined)
-  const [countdown] = useState("countdown", 0); // countdown before game starts (after waiting time is over)
+  const [lobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
   const [playersList] = useState("players", []); // list of players in the lobby
   const [chatMessages] = useState("chatMessages", []); // chat messages in the lobby
+  const waitingTime = lobbyTimer.type === "waitingTime" ? lobbyTimer.value : 0;
+  const countdown = lobbyTimer.type === "countdown" ? lobbyTimer.value : 0;
+  const hasTimer = (waitingTime > 0 && playersList.length >= 2) || countdown > 0;
+  const timerLabel = waitingTime > 0 && playersList.length >= 2 ? "Waiting time" : "Game starts in ";
+  const timerValue = waitingTime > 0 && playersList.length >= 2 ? waitingTime : countdown;
 
   // Handle chat message submission
   function handleChatSubmit(e) {
@@ -31,16 +35,13 @@ export function LobbyView(props) {
         {},
         El("h1", {}, "Waiting for Players"),
         El("p", {}, `Players: ${playersList.length}/4`),
-        (waitingTime > 0 && playersList.length >= 2) || countdown > 0
-          ? El("p", { class: "status-label" }, (waitingTime > 0 && playersList.length >= 2) ? "Waiting time" : "Game starts in ")
-          : null,
-        waitingTime > 0 && playersList.length >= 2
-          ? El("div", { class: "status-box" }, `${waitingTime}s`)
-          : null,
-        countdown > 0 ? El("div", { class: "status-box" }, `${countdown}s`) : null,
-        playersList.length < 2
-          ? El("p", {}, "Waiting for more players to join...")
-          : null,
+        El("p", { class: `status-label ${hasTimer ? "" : "is-hidden"}` }, timerLabel),
+        El("div", { class: `status-box ${hasTimer ? "" : "is-hidden"}` }, hasTimer ? `${timerValue}s` : "0s"),
+        El(
+          "p",
+          { class: `waiting-message ${playersList.length < 2 ? "" : "is-hidden"}` },
+          "Waiting for more players to join...",
+        ),
         El(
           "div",
           { class: "players-list" },

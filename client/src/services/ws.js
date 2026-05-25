@@ -34,6 +34,8 @@ const handlers = {
     useState("nickname", data.nickname);
     useState("players", data.players);
     useState("chatMessages", data.messages);
+    const [, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
+    setLobbyTimer({ type: null, value: 0 });
     const [, setScreen] = useState("screen");
     setScreen("lobby");
   },
@@ -91,15 +93,9 @@ const handlers = {
   },
 
   WAINTING_OR_COUNTDOWN_TIMER(data) {
-    const [, setWaitingTime] = useState("waitingTime");
-    const [, setCountDown] = useState("countdown");
-    if (data.type === "waitingTime") {
-      setWaitingTime(data.waitingTime);
-      setCountDown(0);
-    } else if (data.type === "countdown") {
-      setCountDown(data.waitingTime);
-      setWaitingTime(0);
-    }
+    const [lobbyTimer, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
+    if (lobbyTimer.type === data.type && lobbyTimer.value === data.waitingTime) return;
+    setLobbyTimer({ type: data.type, value: data.waitingTime });
   },
 
   BOMB_PLACED(data) {

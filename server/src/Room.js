@@ -124,7 +124,7 @@ export class Room {
         this.setInterval_countdownTimer = null;
         this.status = "WAITING";
         this.countdown = 0;
-        gameHandler.broadcastState(this.countdown), "countdown";
+        gameHandler.broadcastState(this.countdown, "countdown");
         return;
       }
 
