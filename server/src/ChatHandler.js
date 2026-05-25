@@ -11,6 +11,7 @@ export class ChatHandler {
 
     const player = this.room.players.find(p => p.nickname === nickname);
     const message = {
+      id: crypto.randomUUID(),
       message: TEXT,
       nickname: player.nickname
     };

@@ -1,25 +1,12 @@
-import { El, store, useState, router } from "../../mini-framework/index.js";
-import { getMap, sendSwitchToGameMap } from "../services/ws.js";
+import { El, useState } from "../../mini-framework/index.js";
+import { sendSwitchToGameMap } from "../services/ws.js";
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView(props) {
-  const appDiv = document.getElementById("app");
-  if (appDiv) {
-    const appDOM = new Dom(appDiv, events);
-    appDOM.mount(null);
-  }
-
-  // re-render lobby view (chat, player list, timer))
-  const Cb = () => {
-    if (store.get("screen") === "lobby") {
-      router.render();
-    }
-  };
-
-  const [waitingTime] = useState("waitingTime", 0, Cb); // waiting time before game starts (after 2 players joined)
-  const [countdown] = useState("countdown", 0, Cb); // countdown before game starts (after waiting time is over)
-  const [playersList] = useState("players", [], Cb); // list of players in the lobby
-  const [chatMessages] = useState("chatMessages", [], Cb); // chat messages in the lobby
+  const [waitingTime] = useState("waitingTime", 0); // waiting time before game starts (after 2 players joined)
+  const [countdown] = useState("countdown", 0); // countdown before game starts (after waiting time is over)
+  const [playersList] = useState("players", []); // list of players in the lobby
+  const [chatMessages] = useState("chatMessages", []); // chat messages in the lobby
 
   // Handle chat message submission
   function handleChatSubmit(e) {
@@ -83,7 +70,7 @@ export function LobbyView(props) {
             .map((msg) =>
               El(
                 "div",
-                { class: "chat-message" },
+                { key: msg.id, class: "chat-message" },
                 El("strong", { class: "chat-author" }, `${msg.nickname}`),
                 El("span", { class: "chat-text" }, msg.message),
               ),

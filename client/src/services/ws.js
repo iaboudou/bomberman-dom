@@ -1,4 +1,4 @@
-import { useState, store, router } from "../../mini-framework/index.js";
+import { useState } from "../../mini-framework/index.js";
 import { GameMap } from "../entities/Map.js";
 
 // ─── State
@@ -100,7 +100,6 @@ const handlers = {
       setCountDown(data.waitingTime);
       setWaitingTime(0);
     }
-    if (store.get("screen") === "lobby") router.render();
   },
 
   BOMB_PLACED(data) {
@@ -151,7 +150,7 @@ const handlers = {
   },
 
   ERROR(data) {
-    const [, setError] = useState("error", null, null);
+    const [, setError] = useState("error", null);
     setError(data.message);
   },
 };

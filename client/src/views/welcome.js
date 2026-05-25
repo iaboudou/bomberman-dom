@@ -1,8 +1,8 @@
-import { El, useState, router, Dom, events } from "../../mini-framework/index.js";
+import { El, useState } from "../../mini-framework/index.js";
 
 export function WelcomeView(props) {
     // State to manage error messages
-    const [error, setError] = useState("error", null, () => {router.render()});
+    const [error, setError] = useState("error", null);
 
     // handle form submission
     function handleSubmit(e) {
@@ -44,6 +44,5 @@ export function WelcomeView(props) {
         )
     );
 }
-
 
 
