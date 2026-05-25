@@ -1,5 +1,4 @@
 import { El, useState } from "../../mini-framework/index.js";
-import { sendSwitchToGameMap } from "../services/ws.js";
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView(props) {
@@ -90,15 +89,7 @@ export function LobbyView(props) {
           }),
           El("button", { type: "submit" }, "Send"),
         ),
-        El(
-          "button",
-          {
-            onclick: () => {
-              sendSwitchToGameMap();
-            },
-          },
-          "start game",
-        ),
+
       ),
     ),
   );
