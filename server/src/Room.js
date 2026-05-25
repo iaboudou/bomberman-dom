@@ -43,8 +43,9 @@ export class Room {
   }
 
   // remove the player from the room in case of disconnect
-  removePlayer(playerName) {
-    this.players = this.players.filter(p => p.nickname !== playerName);
+  removePlayer(playerId) {
+    this.players = this.players.filter(p => p.id !== playerId);
+    this.spectators = this.spectators.filter(p => p.id !== playerId);
 
     if (this.players.length < 2) {
       if (this.setInterval_waitingTimer) {
@@ -71,6 +72,10 @@ export class Room {
   // check if the room has reached 4 players
   isFull() {
     return this.players.length >= 4;
+  }
+
+  hasNickname(nickname) {
+    return [...this.players, ...this.spectators].some(p => p.nickname === nickname);
   }
 
   // start 20s waiting timing if more than 2 players

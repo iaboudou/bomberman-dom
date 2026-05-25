@@ -4,7 +4,7 @@ import { Room, startroomgame } from "./src/Room.js";
 import { GameMap } from "./src/Map.js";
 import { Bomb } from "./src/Bomb.js";
 import { spawnPoints } from "./src/Const.js";
-import { broadcastNewPlayer, broadCastPlayerLeft, MoovePlayer, removeAllTimer, sendJoinSuccess, sendMapInfo, sendRoomIsFull, triggerExplosion } from "./src/Utils.js";
+import { broadcastNewPlayer, broadCastPlayerLeft, MoovePlayer, removeAllTimer, sendJoinSuccess, sendMapInfo, sendNameAlreadyUsed, sendRoomIsFull, triggerExplosion } from "./src/Utils.js";
 
 function startServer() {
   const { ROOM, gameHandler } = startroomgame();
@@ -23,6 +23,16 @@ function startServer() {
 
         switch (message.type) {
           case "JOIN": {
+            if (ROOM.isFull()) {
+              sendRoomIsFull(ws);
+              break;
+            }
+
+            if (ROOM.hasNickname(message.data.nickname)) {
+              sendNameAlreadyUsed(ws);
+              break;
+            }
+
             const spawn = spawnPoints[ROOM.players.length];
             const newPlayer = new Player(message.data.nickname, ws, spawn.x, spawn.y);
             const joined = ROOM.addPlayer(newPlayer);
@@ -30,34 +40,37 @@ function startServer() {
             if (joined) {
               sendJoinSuccess(ws, ROOM.players, newPlayer, ROOM.messages)
               broadcastNewPlayer(ROOM.players, newPlayer)
+              player = newPlayer
 
             } else {
               sendRoomIsFull(ws)
             }
 
-            player = newPlayer
             break;
           }
 
           case "CHAT": {
-            const nickname = player ? player.nickname : message.nickname;
-            ROOM.chatHandler.handleMessage(nickname, message.message);
+            if (!player) break;
+            ROOM.chatHandler.handleMessage(player.nickname, message.message);
             break;
           }
 
           case "SWITCH_TO_GAME_MAP": {
+            if (!player) break;
             removeAllTimer(ROOM)
             sendMapInfo(ROOM.players, map)
             break;
           }
 
           case "MOVE": {
+            if (!player) break;
             if (ROOM.spectators.some(s => s.id === player?.id)) break;
             MoovePlayer(message.data.direction, player, map, ROOM)
             break;
           }
 
           case "BOMB": {
+            if (!player) break;
             if (ROOM.spectators.some(s => s.id === player?.id)) break;
             if (!player.canPlaceBomb()) break;
 
@@ -122,7 +135,7 @@ function startServer() {
     // handle client disconnection
     ws.on("close", () => {
       if (player) {
-        const playerLeft = player.nickname
+        const playerLeft = player.id
         ROOM.removePlayer(playerLeft);
         broadCastPlayerLeft(ROOM.players, playerLeft)
         player = null

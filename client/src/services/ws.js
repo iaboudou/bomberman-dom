@@ -50,7 +50,7 @@ const handlers = {
 
   PLAYER_LEFT(data) {
     const [players, setPlayers] = useState("players");
-    setPlayers(players.filter((p) => p !== data.left));
+    setPlayers(players.filter((p) => p.id !== data.left));
   },
 
   PLAYER_MOVED(data) {

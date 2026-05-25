@@ -61,9 +61,9 @@ export function LobbyView(props) {
           ...(playersList || []).map((player) =>
             El(
               "div",
-              { class: "player-item" },
+              { key: player.id, class: "player-item" },
               El("span", {}),
-              ` ${player}`,
+              ` ${player.nickname}`,
             ),
           ),
         ),

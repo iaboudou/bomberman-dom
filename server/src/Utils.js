@@ -7,7 +7,10 @@ export const sendJoinSuccess = (socket, players, newPlayer, messages) => {
       type: "JOIN_SUCCESS",
       data: {
         nickname: newPlayer.nickname,
-        players: players.map(p => p.nickname),
+        players: players.map(p => ({
+          id: p.id,
+          nickname: p.nickname,
+        })),
         messages: messages,
       },
     }),
@@ -17,12 +20,17 @@ export const sendJoinSuccess = (socket, players, newPlayer, messages) => {
 // used to announce new player to the others
 export const broadcastNewPlayer = (players, newPlayer) => {
   players.forEach((p) => {
-    if (p.nickname === newPlayer.nickname) return
+    if (p.id === newPlayer.id) return
 
     p.socket.send(
       JSON.stringify({
         type: "NEW_PLAYER",
-        data: { newPlayer: newPlayer.nickname }
+        data: {
+          newPlayer: {
+            id: newPlayer.id,
+            nickname: newPlayer.nickname,
+          }
+        }
       })
     )
   })
@@ -45,6 +53,16 @@ export const sendRoomIsFull = (socket) => {
     JSON.stringify({
       type: "ERROR",
       data: { message: "Room is full" },
+    }),
+  );
+}
+
+// used to announce that the nickname is already taken
+export const sendNameAlreadyUsed = (socket) => {
+  socket.send(
+    JSON.stringify({
+      type: "ERROR",
+      data: { message: "The name already used, choose another one" },
     }),
   );
 }
