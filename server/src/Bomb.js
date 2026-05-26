@@ -6,7 +6,7 @@ export class Bomb {
     this.x = x;
     this.y = y;
     this.range = range;
-    this.duration = 1500;
+    this.duration = 2400;
   }
 
   explode(map) {

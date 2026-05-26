@@ -8,3 +8,10 @@ x = (colonne - 1) × largeur du block
 y = (ligne - 1) × hauteur du block
 
 background-position : -(x , y)
+
+33*7 16*16 + 1 
+112*160 
+2*16 +8 *1
+2*2
+2*3
+h:5 w:8

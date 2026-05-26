@@ -21,7 +21,10 @@ export function GameView() {
 
   const [bombs] = useState("bombs", []);
   const [powerups] = useState("powerups", []);
+  const [explosions] = useState("explosions", [])
+  const [destroyingBlocks, setDestroyingBlocks] = useState("destroyingBlocks", []);
   const [isSpectator] = useState("spectator", false);
+  
 
   const handleMove = (e) => {
     if (isSpectator) return;
@@ -66,14 +69,33 @@ export function GameView() {
     El(
       "div",
       { id: "map" },
-      El(
-        "div",
-        { class: "grid" },
-        Map.grid
-          .flat()
-          .map((cell, i) =>
-            El("div", { key: i, class: `cell ${Map.classes[cell]}` }),
-          ),
+            El("div", { class: "grid" },
+        Map.grid.flat().map((cell, i) => {
+          const x = i % 17;
+          const y = Math.floor(i / 17);
+          const isDestroying = destroyingBlocks.some((b) => b.x === x && b.y === y);
+          
+          return El("div", {
+            key: i,
+            class: `cell ${isDestroying ? "block-destroying" : Map.classes[cell]}`,
+            ...(isDestroying && {
+              onAnimationend: () => {
+                const [currentMap, setMap] = useState("map");
+                currentMap.grid[y][x] = map.tiles.empty;
+                setMap(currentMap);
+
+                const [blocks, setDestroyingBlocks] = useState("destroyingBlocks", []);
+                const remaining = blocks.filter((b) => !(b.x === x && b.y === y));
+                setDestroyingBlocks(remaining);
+
+                if (remaining.length === 0) {
+                  const [, setExplosions] = useState("explosions", []);
+                  setExplosions([]);
+                }
+              }
+            }),
+          });
+        })
       ),
       El(
         "div",
@@ -101,7 +123,6 @@ export function GameView() {
               class: "bomb",
               style: `--px: ${b.x * 48}px; --py: ${b.y * 48}px`,
             },
-            El("span", null, "💣"),
           ),
         ),
       ),
@@ -113,10 +134,21 @@ export function GameView() {
             "div",
             {
               key: pw.id,
-              class: "powerup",
+              class: `powerup ${pw.type}`,
               style: `--px: ${pw.x * 48}px; --py: ${pw.y * 48}px`,
             },
-            El("span", { class: `${pw.type}` }, pw.icones[pw.type]),
+          ),
+        ),
+      ),
+      El("div", 
+        {id : "explosions"},
+        explosions.map(e => 
+          El("div", 
+            {
+              key : e.id,
+              class : `explosion ${e.position}`,
+              style : `--px: ${e.x * 48}px; --py: ${e.y * 48}px`,
+            },
           ),
         ),
       ),

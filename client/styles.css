@@ -108,6 +108,21 @@ body {
   background-position: -912px -144px;
 }
 
+.block-destroying {
+  animation: block-destroy 0.6s steps(1) forwards;
+}
+
+@keyframes block-destroy {
+  0%   { background-position: -912px  -144px; }
+  14%  { background-position: -960px  -144px; }
+  28%  { background-position: -1008px -144px; }
+  42%  { background-position: -1056px -144px; }
+  57%  { background-position: -1104px -144px; }
+  71%  { background-position: -1152px -144px; }
+  85%  { background-position: -1200px -144px; }
+  100% { background-position: -1248px -144px; }
+}
+
 .player-card {
     border: 1px solid var(--player-color);
     background-color: color-mix(in srgb, var(--player-color) 8%, transparent);
@@ -156,7 +171,8 @@ body {
 
 #players,
 #bombs,
-#powerups {
+#powerups,
+#explosions {
     position: absolute;
     top: 0;
     left: 0;
@@ -187,56 +203,37 @@ body {
 }
 
 .bomb {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    translate: var(--px) var(--py);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.bomb span {
-    font-size: 22px;
-    filter: drop-shadow(0 0 4px red);
-    animation: bomb-pulse 0.6s infinite alternate;
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  translate: var(--px) var(--py);
+  image-rendering: pixelated;
+  background-image: url('./images/tilesets.png');
+  background-size: 2037px 1119px;
+  background-repeat: no-repeat;
+  animation: bomb-pulse 0.8s steps(1) infinite;
 }
 
 @keyframes bomb-pulse {
-    from {
-        transform: scale(1);
-        filter: drop-shadow(0 0 2px red);
-    }
-    to {
-        transform: scale(1.25);
-        filter: drop-shadow(0 0 10px red);
-    }
+  0%   { background-position: -1632px -306px; }
+  33%  { background-position: -1683px -306px; }
+  66%  { background-position: -1734px -306px; }
 }
 
 .powerup {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    translate: var(--px) var(--py);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  translate: var(--px) var(--py);
+  image-rendering: pixelated;
+  background-image: url('./images/power_ups.png');
+  background-size: 336px 480px;
+  background-repeat: no-repeat;
 }
 
-.powerup span {
-    font-size: 20px;
-    animation: float 1.2s ease-in-out infinite;
-}
-
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
-    100% { transform: translateY(0px); }
-}
-
-.powerup .range { filter: drop-shadow(0 0 6px orange); }
-.powerup .maxBombs { filter: drop-shadow(0 0 6px crimson); }
-.powerup .speed { filter: drop-shadow(0 0 6px lime); }
+.powerup.range    { background-position: -24px -15px; }
+.powerup.maxBombs { background-position: -24px -63px; }
+.powerup.speed    { background-position: -24px -111px; }
 
 .result-container {
   display: flex;
@@ -244,6 +241,85 @@ body {
   align-items: center;
   gap: 24px;
 }
+
+.explosion {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  translate: var(--px) var(--py);
+  image-rendering: pixelated;
+  background-image: url('./images/tilesets.png');
+  background-size: 2037px 1119px;
+  background-repeat: no-repeat;
+  animation: expl-anim 0.5s steps(1) forwards;
+}
+
+@keyframes expl-anim {
+  0%   { background-position: var(--f0); }
+  20%  { background-position: var(--f1); }
+  40%  { background-position: var(--f2); }
+  60%  { background-position: var(--f3); }
+  80%  { background-position: var(--f4); }
+  100% { opacity: 0; }
+}
+
+.explosion.center {
+  --f0: -1785px -306px;
+  --f1: -1836px -306px;
+  --f2: -1887px -306px;
+  --f3: -1938px -306px;
+  --f4: -1989px -306px;
+}
+
+.explosion.v-mid {
+  --f0: -1836px -408px;
+  --f1: -1887px -408px;
+  --f2: -1938px -408px;
+  --f3: -1989px -408px;
+  --f4: -1836px -408px;
+}
+
+.explosion.h-mid {
+  --f0: -1632px -408px;
+  --f1: -1683px -408px;
+  --f2: -1734px -408px;
+  --f3: -1785px -408px;
+  --f4: -1632px -408px;
+}
+
+.explosion.right-end {
+  --f0: -1836px -459px;
+  --f1: -1887px -459px;
+  --f2: -1938px -459px;
+  --f3: -1989px -459px;
+  --f4: -1836px -459px;
+}
+
+.explosion.down-end  { 
+  --f0: -1632px -459px;
+  --f1: -1683px -459px;
+  --f2: -1734px -459px;
+  --f3: -1785px -459px;
+  --f4: -1632px -459px;
+}
+
+.explosion.left-end  { 
+  --f0: -1836px -357px;
+  --f1: -1887px -357px;
+  --f2: -1938px -357px;
+  --f3: -1989px -357px;
+  --f4:  -1836px -357px;
+  }
+
+
+.explosion.up-end    {
+  --f0: -1632px -357px;
+  --f1: -1683px -357px;
+  --f2: -1734px -357px;
+  --f3: -1785px -357px;
+  --f4: -1632px -357px;
+}
+
 
 .result-title {
   font-size: 32px;

@@ -121,7 +121,9 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
   if (direction === "ArrowLeft") nx--;
   if (direction === "ArrowRight") nx++;
 
-  if (map.isWalkable(ny, nx)) {
+  const bombOnCell = ROOM.bombs.some((b) => b.x === nx && b.y === ny);
+
+  if (map.isWalkable(ny, nx) && !bombOnCell) {
     player.moove(nx, ny, direction);
 
     const prevPowerups = ROOM.powerups;
@@ -153,6 +155,7 @@ export const triggerExplosion = (bomb, map, ROOM) => {
   const spawnedPowerups = [];
   const deadPlayers = [];
   const affectedPlayers = [];
+  const explosionCells = [];
 
   cellsAffected.forEach(({ x, y }) => {
     if (map.grid[y][x] === map.TILES.block) {
@@ -175,6 +178,12 @@ export const triggerExplosion = (bomb, map, ROOM) => {
         }
       }
     });
+
+    const dx = x - bomb.x;
+    const dy = y - bomb.y;
+    const pos = getPosition(dx,dy, bomb.range)
+
+    explosionCells.push({id : crypto.randomUUID(), x : x, y : y, position : pos})
   });
 
   ROOM.bombs = ROOM.bombs.filter((b) => b.id !== bomb.id);
@@ -208,9 +217,35 @@ export const triggerExplosion = (bomb, map, ROOM) => {
       if (p.socket && p.socket.readyState === 1) {
         p.socket.send(JSON.stringify({
           type: "BOMB_EXPLODED",
-          data: { bombId: bomb.id, removedBlocks, spawnedPowerups, deadPlayers, affectedPlayers },
+          data: { bombId: bomb.id, removedBlocks, spawnedPowerups, deadPlayers, affectedPlayers, explosionCells },
         }));
       }
+
+      setTimeout(()=> {
+        p.socket.send(JSON.stringify({
+          type: "REMOVE_EXPLOSIONS",
+          data: { explosionCells },
+        }));
+      },500)
     });
   }
 };
+
+function getPosition(x, y, range) {
+  // centre
+  if (x === 0 && y === 0) return "center";
+
+  // axe vertical
+  if (x === 0) {
+    if (y === range) return "down-end";   
+    if (y === -range) return "up-end"; 
+    return "h-mid";
+  }
+
+  // axe horizontal
+  if (y === 0) {
+    if (x === range) return "right-end";
+    if (x === -range) return "left-end";
+    return "v-mid";
+  }
+}
