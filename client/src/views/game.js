@@ -22,9 +22,7 @@ export function GameView() {
   const [bombs] = useState("bombs", []);
   const [powerups] = useState("powerups", []);
   const [explosions] = useState("explosions", [])
-  const [destroyingBlocks, setDestroyingBlocks] = useState("destroyingBlocks", []);
   const [isSpectator] = useState("spectator", false);
-  
 
   const handleMove = (e) => {
     if (isSpectator) return;
@@ -69,33 +67,14 @@ export function GameView() {
     El(
       "div",
       { id: "map" },
-            El("div", { class: "grid" },
-        Map.grid.flat().map((cell, i) => {
-          const x = i % 17;
-          const y = Math.floor(i / 17);
-          const isDestroying = destroyingBlocks.some((b) => b.x === x && b.y === y);
-          
-          return El("div", {
-            key: i,
-            class: `cell ${isDestroying ? "block-destroying" : Map.classes[cell]}`,
-            ...(isDestroying && {
-              onAnimationend: () => {
-                const [currentMap, setMap] = useState("map");
-                currentMap.grid[y][x] = map.tiles.empty;
-                setMap(currentMap);
-
-                const [blocks, setDestroyingBlocks] = useState("destroyingBlocks", []);
-                const remaining = blocks.filter((b) => !(b.x === x && b.y === y));
-                setDestroyingBlocks(remaining);
-
-                if (remaining.length === 0) {
-                  const [, setExplosions] = useState("explosions", []);
-                  setExplosions([]);
-                }
-              }
-            }),
-          });
-        })
+      El(
+        "div",
+        { class: "grid" },
+        Map.grid
+          .flat()
+          .map((cell, i) =>
+            El("div", { key: i, class: `cell ${Map.classes[cell]}` }),
+          ),
       ),
       El(
         "div",

@@ -103,37 +103,34 @@ const handlers = {
     setBombs([...bombs, data.bomb]);
   },
 
-
   BOMB_EXPLODED(data) {
     const [bombs, setBombs] = useState("bombs", []);
     setBombs(bombs.filter((b) => b.id !== data.bombId));
-
-    const [, setExplosions] = useState("explosions", []);
-    setExplosions(data.explosionCells);
-
     if (data.removedBlocks.length > 0) {
-      const [, setDestroyingBlocks] = useState("destroyingBlocks", []);
-      setDestroyingBlocks(data.removedBlocks);
-    } else {
-      const [, setDestroyingBlocks] = useState("destroyingBlocks", []);
-      setDestroyingBlocks([]);
+      const [currentMap, setMap] = useState("map");
+      data.removedBlocks.forEach(({ x, y }) => {
+        currentMap.grid[y][x] = map.tiles.empty;
+      });
+      setMap(currentMap);
     }
-
     if (data.spawnedPowerups.length > 0) {
       const [powerups, setPowerups] = useState("powerups", []);
       setPowerups([...powerups, ...data.spawnedPowerups]);
     }
 
-    const [players, setPlayers] = useState("players", []);
-    setPlayers(
-      players
-        .filter((p) => !data.deadPlayers.includes(p.id))
-        .map((p) => {
-          const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
-          return hit ? { ...p, remaininglife: hit.remaininglife } : p;
-        })
-    );
+    if (data.explosionCells.length > 0) {
+      const [explosions, setExplosions] = useState("explosions", []);
+      setExplosions([...explosions, ...data.explosionCells]);
+    }
 
+    const [players, setPlayers] = useState("players", []);
+    const updated = players
+      .filter((p) => !data.deadPlayers.includes(p.id))
+      .map((p) => {
+        const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
+        return hit ? { ...p, remaininglife: hit.remaininglife } : p;
+      });
+    setPlayers(updated);
   },
 
   REMOVE_EXPLOSIONS(data) {
