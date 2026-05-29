@@ -18,6 +18,7 @@ export class Room {
     this.createdAt = Date.now();
     this.chatHandler = new ChatHandler(this);
     this.spectators = [];
+    this.explosionCells= [];
   }
 
   // add new player to the room

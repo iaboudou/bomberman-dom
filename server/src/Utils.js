@@ -121,6 +121,7 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
   if (direction === "ArrowLeft") nx--;
   if (direction === "ArrowRight") nx++;
 
+  // if bomb exist on the cell, the player shouldn't move
   const bombOnCell = ROOM.bombs.some((b) => b.x === nx && b.y === ny);
 
   if (map.isWalkable(ny, nx) && !bombOnCell) {
@@ -131,6 +132,51 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
     const powerupsChanged = ROOM.powerups.length !== prevPowerups.length;
 
     const everyone = [...ROOM.players, ...ROOM.spectators];
+
+    const isInExplosion = ROOM.explosionCells?.some(e => e.x === nx && e.y === ny);
+
+    if (isInExplosion) {
+      player.loseLife();
+
+      if (player.isDead()) {
+        ROOM.players = ROOM.players.filter(p => p.id !== player.id);
+        ROOM.spectators.push(player);
+
+        if (player.socket?.readyState === 1) {
+          player.socket.send(JSON.stringify({ type: "YOU_DIED" }));
+        }
+
+        if (ROOM.players.length <= 1) {
+          const winner = ROOM.players[0] || null;
+          everyone.forEach((p) => {
+            if (p.socket?.readyState === 1) {
+              p.socket.send(JSON.stringify({
+                type: "GAME_OVER",
+                data: { winner: winner ? { id: winner.id, nickname: winner.nickname } : null },
+              }));
+            }
+          });
+          return;
+        }
+      }
+
+      everyone.forEach((p) => {
+        if (p.socket?.readyState === 1) {
+          p.socket.send(JSON.stringify({
+            type: "BOMB_EXPLODED",
+            data: {
+              bombId: null,
+              removedBlocks: [],
+              spawnedPowerups: [],
+              deadPlayers: player.isDead() ? [player.id] : [],
+              affectedPlayers: !player.isDead() ? [{ id: player.id, remaininglife: player.remaininglife }] : [],
+              explosionCells: [],
+            },
+          }));
+        }
+      });
+    }
+
     everyone.forEach((p) => {
       if (p.socket && p.socket.readyState === 1) {
         p.socket.send(JSON.stringify({
@@ -181,9 +227,12 @@ export const triggerExplosion = (bomb, map, ROOM) => {
 
     const dx = x - bomb.x;
     const dy = y - bomb.y;
-    const pos = getPosition(dx,dy, bomb.range)
+    const pos = getPosition(dx, dy, bomb.range)
 
-    explosionCells.push({id : crypto.randomUUID(), x : x, y : y, position : pos})
+    const cell = { id: crypto.randomUUID(), x: x, y: y, position: pos };
+    explosionCells.push(cell);
+    ROOM.explosionCells.push(cell);
+
   });
 
   ROOM.bombs = ROOM.bombs.filter((b) => b.id !== bomb.id);
@@ -220,14 +269,21 @@ export const triggerExplosion = (bomb, map, ROOM) => {
           data: { bombId: bomb.id, removedBlocks, spawnedPowerups, deadPlayers, affectedPlayers, explosionCells },
         }));
       }
-
-      setTimeout(()=> {
-        p.socket.send(JSON.stringify({
-          type: "REMOVE_EXPLOSIONS",
-          data: { explosionCells },
-        }));
-      },500)
     });
+
+    setTimeout(() => {
+      const idsToRemove = new Set(explosionCells.map(e => e.id));
+      ROOM.explosionCells = ROOM.explosionCells.filter(e => !idsToRemove.has(e.id));
+
+      everyone.forEach((p) => {
+        if (p.socket && p.socket.readyState === 1) {
+          p.socket.send(JSON.stringify({
+            type: "REMOVE_EXPLOSIONS",
+            data: { explosionCells },
+          }));
+        }
+      });
+    }, 500);
   }
 };
 
@@ -237,8 +293,8 @@ function getPosition(x, y, range) {
 
   // axe vertical
   if (x === 0) {
-    if (y === range) return "down-end";   
-    if (y === -range) return "up-end"; 
+    if (y === range) return "down-end";
+    if (y === -range) return "up-end";
     return "h-mid";
   }
 

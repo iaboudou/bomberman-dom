@@ -32,7 +32,7 @@ export function LobbyView(props) {
       El(
         "div",
         {},
-        El("h1", {}, "Waiting for Players"),
+        El("h1", {}, "BOMBERMAN"),
         El("p", {}, `Players: ${playersList.length}/4`),
         El("p", { class: `status-label ${hasTimer ? "" : "is-hidden"}` }, timerLabel),
         El("div", { class: `status-box ${hasTimer ? "" : "is-hidden"}` }, hasTimer ? `${timerValue}s` : "0s"),
