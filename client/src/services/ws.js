@@ -13,7 +13,6 @@ export function startWebsocketService() {
   ws.onerror = (err) => console.log(err);
   ws.onmessage = onMessage;
 }
-
 // ─2 ── Message processing
 function onMessage(event) {
   let message;
