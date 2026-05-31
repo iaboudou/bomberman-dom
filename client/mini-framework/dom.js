@@ -29,6 +29,11 @@ export class Dom {
     return { tag, key, attrs, children: mappedChildren };
   }
 
+  // Query a selector within this Dom's container
+  query(selector) {
+    return this.container.querySelector(selector);
+  }
+
   // Converts a virtual DOM node (vnode) into a real DOM element
   render(vnode) {
     if (vnode.type === "text") {
@@ -75,13 +80,17 @@ export class Dom {
 
   // multiple calls within the same frame are collapsed into one diff
   scheduleMount(vnode) {
-    this._pendingVnode = vnode;
-    if (!this._dirty) {
-      this._dirty = true;
-      requestAnimationFrame(() => {
-        this.mount(this._pendingVnode);
+  this._pendingVnode = vnode;
+  if (!this._dirty) {
+    this._dirty = true;
+    requestAnimationFrame(() => {
+      if (!this.container) {
         this._dirty = false;
-      });
+        return;
+      }
+      this.mount(this._pendingVnode);
+      this._dirty = false;
+    });
     }
   }
 
@@ -131,6 +140,7 @@ export class Dom {
       parent.appendChild(this.render(newVnode));
       return;
     }
+
     // replace old element with the new one
     if (oldVnode.tag !== newVnode.tag) {
       this._removeEventsRecursively(oldVnode);
@@ -142,14 +152,12 @@ export class Dom {
     newVnode._el = oldVnode._el;
 
     for (const key in newVnode.attrs) {
-      //update element attribute
       if (newVnode.attrs[key] !== oldVnode.attrs[key]) {
         this._setAttr(newVnode._el, key, newVnode.attrs[key]);
       }
     }
 
     for (const key in oldVnode.attrs) {
-      // remove old attribute
       if (!(key in newVnode.attrs)) {
         this._removeAttr(newVnode._el, key, oldVnode.attrs[key]);
       }
@@ -191,13 +199,11 @@ export class Dom {
         const oldChild = oldByKey[newChild.key];
 
         if (oldChild) {
-          // Patch in place, then move to the correct DOM position if needed
           this.patch(oldChild, newChild, parentEl);
           if (parentEl.childNodes[i] !== newChild._el) {
             parentEl.insertBefore(newChild._el, parentEl.childNodes[i] ?? null);
           }
         } else {
-          // New child: render and insert at the correct position
           const newEl = this.render(newChild);
           if (parentEl.childNodes[i]) {
             parentEl.insertBefore(newEl, parentEl.childNodes[i]);
@@ -207,7 +213,6 @@ export class Dom {
         }
       });
     } else {
-      // compare children with index
       const maxLen = Math.max(oldChildren.length, newChildren.length);
       for (let i = 0; i < maxLen; i++) {
         this.patch(oldChildren[i] ?? null, newChildren[i] ?? null, parentEl);
@@ -238,47 +243,37 @@ export class Dom {
       return;
     }
 
-    // onClick, onInput, onChange
     if (key.startsWith("on")) {
       const eventName = key.slice(2).toLowerCase();
 
-      // If a listener already exists for this event, remove it
       if (el._listeners?.[eventName]) {
         this.event.off(el, eventName, el._listeners[eventName]);
       }
 
-      // Ensure the internal listener store exists
       el._listeners ??= {};
-
-      // Save the new listener reference and attach
       el._listeners[eventName] = value;
       this.event.on(el, eventName, value);
       return;
     }
 
-    // Handle autofocus — must be deferred because the element must be in the DOM first
     if (key === "autofocus" && value) {
       setTimeout(() => el.focus(), 0);
       return;
     }
 
-    // If the key exists directly on the element (e.g. value, checked, disabled)
     if (key in el) {
       el[key] = value;
       return;
     }
 
-    // For standard attributes like id, class, data-*
     el.setAttribute(key, value);
   }
 
   // removes attributes from a DOM element
   _removeAttr(el, key, _oldValue) {
-    // onClick, onInput, onChange
     if (key.startsWith("on")) {
       const eventName = key.slice(2).toLowerCase();
 
-      // If a listener exists, remove it and clean up internal reference
       if (el._listeners?.[eventName]) {
         this.event.off(el, eventName, el._listeners[eventName]);
         delete el._listeners[eventName];
@@ -286,7 +281,6 @@ export class Dom {
       return;
     }
 
-    // If the key exists directly on the element (e.g. value, checked, disabled)
     if (key in el) {
       try {
         el[key] = typeof el[key] === "boolean" ? false : "";
@@ -295,7 +289,6 @@ export class Dom {
       }
     }
 
-    // For standard attributes like id, class, data-*
     el.removeAttribute(key);
   }
 }

@@ -8,8 +8,9 @@ const store = new Store();
 const dom = new Dom(document.body, events);
 const router = new Router(dom, store);
 const El = dom.el.bind(dom);
+const getEl = (selector) => dom.query(selector) 
 
-export { Dom, events, store, router, El };
+export { Dom, events, store, router, El, getEl };
 
 export const useState = (key, initialValue = null) => {
   if (store.get(key) === undefined) {

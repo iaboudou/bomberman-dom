@@ -47,11 +47,16 @@ export class Store {
   }
 
   // subscribe to a specific key — callback is called only when that key changes
-  // ex: store.subscribeKey("players", (players) => { playersDOM.scheduleMount(renderPlayers(players)) });
   subscribe(key, cb) {
     if (!this.listeners[key]) this.listeners[key] = [];
     this.listeners[key].push(cb);
   }
+
+  // unsubscribe a specific listner of a specific key
+  unsubscribe(key, cb) {
+  if (!this.listeners[key]) return;
+  this.listeners[key] = this.listeners[key].filter(fn => fn !== cb);
+}
 
   // call all registered listener functions and passes them the current state,
   // so they can react to state changes (e.g. update UI, log data, etc.)

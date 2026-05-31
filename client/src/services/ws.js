@@ -1,10 +1,10 @@
-import { useState } from "../../mini-framework/index.js";
+import { useState, store } from "../../mini-framework/index.js";
 import { GameMap } from "../entities/Map.js";
+import { initDoms, resetDoms } from "../views/game.js";
 
 // ─── State
 export let ws = null;
 export const map = {};
-
 
 // ─1 ── Connection
 export function startWebsocketService() {
@@ -25,7 +25,6 @@ function onMessage(event) {
   const handler = handlers[message.type];
   if (handler) handler(message.data);
 }
-
 
 // ─3 ── Message handlers
 const handlers = {
@@ -56,40 +55,37 @@ const handlers = {
   },
 
   PLAYER_MOVED(data) {
-    const [players, setPlayers] = useState("players", []);
-    const updated = players.map((p) =>
+    const players = store.get("players") || [];
+    store.set({ players: players.map((p) =>
       p.id === data.id
         ? { ...p, x: data.x, y: data.y, direction: data.direction }
         : p
-    );
-    setPlayers(updated);
+    )});
+
     if (data.powerups) {
-      const [, setPowerups] = useState("powerups");
-      setPowerups(data.powerups);
+      store.set({ powerups: data.powerups });
     }
+
   },
 
   MAP_INIT(data) {
     const [nickname] = useState("nickname");
-    const [, setPlayers] = useState("players");
-    const [, setCurrentPlayer] = useState("currentPlayer");
-    const [, setScreen] = useState("screen");
-    const [, setMap] = useState("map");
-    const [, setBombs] = useState("bombs", []);
-    const [, setPowerups] = useState("powerups", []);
-    const [, setSpectator] = useState("spectator", false);
-    const [, setWinner] = useState("winner", null);
-    map.grid = data.grid;
-    map.tiles = data.tiles;
+    map.grid    = data.grid;
+    map.tiles   = data.tiles;
     map.classes = data.classes;
-    setMap(new GameMap(data.grid, data.tiles));
-    setPlayers(data.players);
-    setCurrentPlayer(data.players.find((p) => p.nickname === nickname));
-    setBombs([]);
-    setPowerups([]);
-    setSpectator(false);
-    setWinner(null);
+
+    store.set({ map:             new GameMap(data.grid, data.tiles) });
+    store.set({ players:         data.players });
+    store.set({ bombs:           [] });
+    store.set({ powerups:        [] });
+    store.set({ explosions:      [] });
+    store.set({ spectator:       false });
+    store.set({ winner:          null });
+
+    const [, setScreen] = useState("screen");
     setScreen("game");
+
+    requestAnimationFrame(() => initDoms());
   },
 
   WAINTING_OR_COUNTDOWN_TIMER(data) {
@@ -99,57 +95,58 @@ const handlers = {
   },
 
   BOMB_PLACED(data) {
-    const [bombs, setBombs] = useState("bombs", []);
-    setBombs([...bombs, data.bomb]);
+    const bombs = store.get("bombs") || [];
+    store.set({ bombs: [...bombs, data.bomb] });
   },
 
   BOMB_EXPLODED(data) {
-    const [bombs, setBombs] = useState("bombs", []);
-    setBombs(bombs.filter((b) => b.id !== data.bombId));
+    const bombs = store.get("bombs") || [];
+    store.set({ bombs: bombs.filter((b) => b.id !== data.bombId) });
+
     if (data.removedBlocks.length > 0) {
-      const [currentMap, setMap] = useState("map");
+      const currentMap = store.get("map");
       data.removedBlocks.forEach(({ x, y }) => {
         currentMap.grid[y][x] = map.tiles.empty;
       });
-      setMap(currentMap);
+      store.set({ map: { ...currentMap } }); // ← nouvelle référence
     }
+
     if (data.spawnedPowerups.length > 0) {
-      const [powerups, setPowerups] = useState("powerups", []);
-      setPowerups([...powerups, ...data.spawnedPowerups]);
+      const powerups = store.get("powerups") || [];
+      store.set({ powerups: [...powerups, ...data.spawnedPowerups] });
     }
 
     if (data.explosionCells.length > 0) {
-      const [explosions, setExplosions] = useState("explosions", []);
-      setExplosions([...explosions, ...data.explosionCells]);
+      const explosions = store.get("explosions") || [];
+      store.set({ explosions: [...explosions, ...data.explosionCells] });
     }
 
-    const [players, setPlayers] = useState("players", []);
-    const updated = players
-      .filter((p) => !data.deadPlayers.includes(p.id))
-      .map((p) => {
-        const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
-        return hit ? { ...p, remaininglife: hit.remaininglife } : p;
-      });
-    setPlayers(updated);
+    const players = store.get("players") || [];
+
+    const updatedPlayers = players
+    .filter((p) => !data.deadPlayers.includes(p.id))
+    .map((p) => {
+      const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
+      return hit ? { ...p, remaininglife: hit.remaininglife } : p;
+    });
+
+    store.set({ players: updatedPlayers });
+    store.set({ playersLife: updatedPlayers });
   },
 
   REMOVE_EXPLOSIONS(data) {
-    const [explosions, setExplosions] = useState("explosions", []);
-
+    const explosions = store.get("explosions") || [];
     const idsToRemove = new Set(data.explosionCells.map(e => e.id));
-    const filtered = explosions.filter(exp => !idsToRemove.has(exp.id));
-
-    setExplosions(filtered);
+    store.set({ explosions: explosions.filter(exp => !idsToRemove.has(exp.id)) });
   },
 
   YOU_DIED() {
-    const [, setSpectator] = useState("spectator", false);
-    setSpectator(true);
+    store.set({ spectator: true });
   },
 
   GAME_OVER(data) {
-    const [, setWinner] = useState("winner", null);
-    setWinner(data.winner);
+    store.set({ winner: data.winner });
+    resetDoms()
     const [, setScreen] = useState("screen");
     setScreen("result");
   },
@@ -157,7 +154,6 @@ const handlers = {
   RESET_GAME() {
     const [, setScreen] = useState("screen");
     setScreen("game");
-    const [, setMap] = useState("map");
   },
 
   ERROR(data) {
@@ -166,7 +162,6 @@ const handlers = {
   },
 };
 
-
 // ─4 ── Actions 
 function send(type, data = {}) {
   if (ws?.readyState === WebSocket.OPEN) {
@@ -174,9 +169,9 @@ function send(type, data = {}) {
   }
 }
 
-export const joinGame = (nickname) => send("JOIN", { nickname });
+export const joinGame = (nickname)  => send("JOIN",{ nickname });
 export const getMap = () => send("MAP_INIT");
-export const sendMove = (direction) => send("MOVE", { direction });
+export const sendMove = (direction) => send("MOVE",{ direction });
 export const sendBomb = () => send("BOMB");
 export const sendSwitchToGameMap = () => send("SWITCH_TO_GAME_MAP");
 export const sendResetGame = () => send("RESET_GAME");
