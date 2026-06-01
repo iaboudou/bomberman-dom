@@ -62,12 +62,6 @@ export class Room {
       this.waitingTime = 0;
     }
 
-    // reset when the room is empty
-    if (this.players.length === 0) {
-      this.bombs = [];
-      this.powerups = [];
-      this.map = new GameMap();
-    }
   }
 
   // check if the room has reached 4 players

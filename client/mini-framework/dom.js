@@ -80,17 +80,23 @@ export class Dom {
 
   // multiple calls within the same frame are collapsed into one diff
   scheduleMount(vnode) {
-  this._pendingVnode = vnode;
-  if (!this._dirty) {
-    this._dirty = true;
-    requestAnimationFrame(() => {
-      if (!this.container) {
+    this._pendingVnode = vnode;
+    if (!this._dirty) {
+      this._dirty = true;
+      requestAnimationFrame(() => {
+        if (!this.container) {
+          this._dirty = false;
+          return;
+        }
+        const start = performance.now();
+
+        this.mount(this._pendingVnode);
+
+        const end = performance.now();
+        console.log("mount:", (end - start).toFixed(2), "ms");
+
         this._dirty = false;
-        return;
-      }
-      this.mount(this._pendingVnode);
-      this._dirty = false;
-    });
+      });
     }
   }
 

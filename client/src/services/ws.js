@@ -8,7 +8,7 @@ export const map = {};
 
 // ─1 ── Connection
 export function startWebsocketService() {
-  ws = new WebSocket(`ws://localhost:8080`);
+  ws = new WebSocket(`ws://10.1.9.6:8080`);
   ws.onopen = () => console.log("connected to the ws");
   ws.onerror = (err) => console.log(err);
   ws.onmessage = onMessage;
