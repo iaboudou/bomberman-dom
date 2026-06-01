@@ -46,11 +46,6 @@ export class Store {
     this.notify(newState, prevState);
   }
 
-  // allows you to update the state of the store by merging the new state with the existing state without notifying any registered listeners (this.listeners) about the change.
-  setSilent(newState) {
-    this.state = { ...this.state, ...newState };
-  }
-
   // subscribe to a specific key — callback is called only when that key changes
   subscribe(key, cb) {
     if (!this.listeners[key]) this.listeners[key] = [];
