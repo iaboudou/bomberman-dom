@@ -31,7 +31,7 @@ const handlers = {
   JOIN_SUCCESS(data) {
     useState("nickname", data.nickname);
     useState("players", data.players);
-    useState("chatMessages", data.messages);
+    useState("chatMessages", []);
     const [, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
     setLobbyTimer({ type: null, value: 0 });
     const [, setScreen] = useState("screen");
@@ -145,6 +145,7 @@ const handlers = {
 
   GAME_OVER(data) {
     store.set({ winner: data.winner });
+    store.set({players: data.players})
     resetDoms()
     const [, setScreen] = useState("screen");
     setScreen("result");

@@ -4,13 +4,22 @@ import { Room, startroomgame } from "./src/Room.js";
 import { GameMap } from "./src/Map.js";
 import { Bomb } from "./src/Bomb.js";
 import { spawnPoints } from "./src/Const.js";
-import { broadcastNewPlayer, broadCastPlayerLeft, MoovePlayer, removeAllTimer, sendJoinSuccess, sendMapInfo, sendNameAlreadyUsed, sendRoomIsFull, triggerExplosion } from "./src/Utils.js";
+import {
+  broadcastNewPlayer,
+  broadCastPlayerLeft,
+  MoovePlayer,
+  removeAllTimer,
+  sendJoinSuccess,
+  sendMapInfo,
+  sendNameAlreadyUsed,
+  sendRoomIsFull,
+  triggerExplosion,
+} from "./src/Utils.js";
 
 function startServer() {
   const { ROOM, gameHandler } = startroomgame();
-  let map = new GameMap();
-  map.generateBlock();
-  ROOM.map = map;
+  let map = gameHandler.ROOM.map;
+  // ROOM.map = map;
 
   const wss = new WebSocketServer({ port: 8080 });
 
@@ -19,6 +28,7 @@ function startServer() {
 
     // handle client messages
     ws.on("message", (data) => {
+      console.log(ROOM.players.length ,ROOM.players.map((p)=> p.nickname))
       try {
         const message = JSON.parse(data);
 
@@ -35,16 +45,20 @@ function startServer() {
             }
 
             const spawn = spawnPoints[ROOM.players.length];
-            const newPlayer = new Player(message.data.nickname, ws, spawn.x, spawn.y);
+            const newPlayer = new Player(
+              message.data.nickname,
+              ws,
+              spawn.x,
+              spawn.y
+            );
             const joined = ROOM.addPlayer(newPlayer);
 
             if (joined) {
-              sendJoinSuccess(ws, ROOM.players, newPlayer, ROOM.messages)
-              broadcastNewPlayer(ROOM.players, newPlayer)
-              player = newPlayer
-
+              sendJoinSuccess(ws, ROOM.players, newPlayer);
+              broadcastNewPlayer(ROOM.players, newPlayer);
+              player = newPlayer;
             } else {
-              sendRoomIsFull(ws)
+              sendRoomIsFull(ws);
             }
 
             break;
@@ -58,21 +72,26 @@ function startServer() {
 
           case "SWITCH_TO_GAME_MAP": {
             if (!player) break;
-            removeAllTimer(ROOM)
-            sendMapInfo(ROOM.players, map)
+            removeAllTimer(ROOM);
+            sendMapInfo(ROOM.players, gameHandler.ROOM.map);
             break;
           }
 
           case "MOVE": {
             if (!player) break;
-            if (ROOM.spectators.some(s => s.id === player?.id)) break;
-            MoovePlayer(message.data.direction, player, map, ROOM)
+            if (ROOM.spectators.some((s) => s.id === player?.id)) break;
+            MoovePlayer(
+              message.data.direction,
+              player,
+              gameHandler.ROOM.map,
+              ROOM
+            );
             break;
           }
 
           case "BOMB": {
             if (!player) break;
-            if (ROOM.spectators.some(s => s.id === player?.id)) break;
+            if (ROOM.spectators.some((s) => s.id === player?.id)) break;
             if (!player.canPlaceBomb()) break;
 
             const bomb = new Bomb(player.x, player.y, player.range);
@@ -81,19 +100,24 @@ function startServer() {
 
             ROOM.bombs.push(bomb);
 
-            const everyone = [...ROOM.players, ...ROOM.spectators];
+            const everyone = [
+              ...(ROOM?.players || []),
+              ...(ROOM?.spectators || []),
+            ];
             everyone.forEach((p) => {
               if (p.socket && p.socket.readyState === 1) {
-                p.socket.send(JSON.stringify({
-                  type: "BOMB_PLACED",
-                  data: { bomb },
-                }));
+                p.socket.send(
+                  JSON.stringify({
+                    type: "BOMB_PLACED",
+                    data: { bomb },
+                  })
+                );
               }
             });
 
             setTimeout(() => {
               player.activeBombs--;
-              triggerExplosion(bomb, map, ROOM)
+              triggerExplosion(bomb, gameHandler.ROOM.map, ROOM);
             }, bomb.duration);
 
             break;
@@ -123,6 +147,8 @@ function startServer() {
 
             ROOM.bombs = [];
             ROOM.powerups = [];
+
+            if (ROOM.players.length <= 1) break
             sendMapInfo(ROOM.players, map);
             break;
           }
@@ -135,10 +161,34 @@ function startServer() {
     // handle client disconnection
     ws.on("close", () => {
       if (player) {
-        const playerLeft = player.id
+        const playerLeft = player.id;
         ROOM.removePlayer(playerLeft);
-        broadCastPlayerLeft(ROOM.players, playerLeft)
-        player = null
+        ///
+        if (ROOM.players.length <= 1) {
+          const winner = ROOM.players[0] || null;
+          const everyone = [
+            ...(ROOM?.players || []),
+            ...(ROOM?.spectators || []),
+          ];
+          everyone.forEach((p) => {
+            if (p.socket && p.socket.readyState === 1) {
+              p.socket.send(
+                JSON.stringify({
+                  type: "GAME_OVER",
+                  data: {
+                    winner: winner
+                      ? { id: winner.id, nickname: winner.nickname, players: ROOM.players }
+                      : null,
+                  },
+                })
+              );
+            }
+          });
+          return;
+        }
+        /////
+        broadCastPlayerLeft(ROOM.players, playerLeft);
+        player = null;
       }
     });
   });

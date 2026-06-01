@@ -16,7 +16,7 @@ export class ChatHandler {
       nickname: player.nickname
     };
 
-    this.room.messages.push(message);
+    // this.room.messages.push(message);
     this.broadcastMessage(message);
   }
 

@@ -10,7 +10,6 @@ export function LobbyView(props) {
   const hasTimer = (waitingTime > 0 && playersList.length >= 2) || countdown > 0;
   const timerLabel = waitingTime > 0 && playersList.length >= 2 ? "Waiting time" : "Game starts in ";
   const timerValue = waitingTime > 0 && playersList.length >= 2 ? waitingTime : countdown;
-
   // Handle chat message submission
   function handleChatSubmit(e) {
     e.preventDefault();
