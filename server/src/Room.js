@@ -57,7 +57,7 @@ export class Room {
         clearInterval(this.setInterval_countdownTimer);
         this.setInterval_countdownTimer = null;
       }
-      this.status = "WAITING";
+      // this.status = "WAITING";
       this.countdown = 0;
       this.waitingTime = 0;
     }

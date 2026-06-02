@@ -12,8 +12,9 @@ export class GameHandler {
     this.ROOM.spectators = [];
     this.ROOM.bombs = [];
     this.ROOM.powerups = [];
-    this.ROOM.map = new GameMap()///////
-    this.ROOM.map.generateBlock()/////
+    this.ROOM.map = new GameMap(); ///////
+    this.ROOM.map.generateBlock(); /////
+    console.log("in game: ", this.ROOM.status)
 
     this.ROOM.players.forEach((p, i) => {
       const spawn = spawnPoints[i];

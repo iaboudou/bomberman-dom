@@ -64,7 +64,6 @@ const handlers = {
     if (data.powerups) {
       store.set({ powerups: data.powerups });
     }
-
   },
 
   MAP_INIT(data) {
@@ -91,6 +90,10 @@ const handlers = {
     const [lobbyTimer, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
     if (lobbyTimer.type === data.type && lobbyTimer.value === data.waitingTime) return;
     setLobbyTimer({ type: data.type, value: data.waitingTime });
+
+    if (data?.players) {
+      store.set({ players: data.players });
+    }
   },
 
   BOMB_PLACED(data) {

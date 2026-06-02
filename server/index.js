@@ -28,7 +28,6 @@ function startServer() {
 
     // handle client messages
     ws.on("message", (data) => {
-      console.log(ROOM.players.length ,ROOM.players.map((p)=> p.nickname))
       try {
         const message = JSON.parse(data);
 
@@ -148,7 +147,17 @@ function startServer() {
             ROOM.bombs = [];
             ROOM.powerups = [];
 
-            if (ROOM.players.length <= 1) break
+            ROOM.status = "WAITING";
+            ROOM.waitingTime = 0;
+            ROOM.countdown = 0;
+
+            if (ROOM.players.length === 2) {
+              ROOM.startWaitingTimer();
+            } else if (ROOM.players.length === 4) {
+              ROOM.startCountdown();
+            }
+
+            if (ROOM.players.length <= 1) break;
             sendMapInfo(ROOM.players, map);
             break;
           }
@@ -172,12 +181,31 @@ function startServer() {
           ];
           everyone.forEach((p) => {
             if (p.socket && p.socket.readyState === 1) {
+              if (ROOM.status == "WAITING" || ROOM.status == "COUNTDOWN") {
+                p.socket.send(
+                  JSON.stringify({
+                    type: "WAINTING_OR_COUNTDOWN_TIMER",
+                    data: {
+                      waitingTime: 0,
+                      type: "WAITING",
+                      players: everyone,
+                    },
+                  })
+                );
+                ROOM.status = "WAITING";
+                return;
+              }
+              ROOM.removePlayer(p.id);
               p.socket.send(
                 JSON.stringify({
                   type: "GAME_OVER",
                   data: {
                     winner: winner
-                      ? { id: winner.id, nickname: winner.nickname, players: ROOM.players }
+                      ? {
+                          id: winner.id,
+                          nickname: winner.nickname,
+                          players: ROOM.players,
+                        }
                       : null,
                   },
                 })
