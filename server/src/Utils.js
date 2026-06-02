@@ -78,13 +78,20 @@ export const removeAllTimer = (ROOM) => {
     clearInterval(ROOM.setInterval_countdownTimer);
     ROOM.setInterval_countdownTimer = null;
   }
+
+  // clear pending timeouts
+  if (ROOM.pendingTimeouts && ROOM.pendingTimeouts.length) {
+    ROOM.pendingTimeouts.forEach((id) => clearTimeout(id));
+    ROOM.pendingTimeouts = [];
+  }
+
   ROOM.waitingTime = 0;
   ROOM.countdown = 0;
   ROOM.status = "INGAME";
 };
 
 // used to send the map info to all players when switching to game map
-export const sendMapInfo = (players, map) => {
+export const sendMapInfo = (players, map, powerups = []) => {
   players.forEach((p) => {
     if (p.socket && p.socket.readyState === 1) {
       p.socket.send(
@@ -94,6 +101,7 @@ export const sendMapInfo = (players, map) => {
             grid: map.grid,
             tiles: map.TILES,
             classes: map.classes,
+            powerups: powerups,
             players: players.map((player) => ({
               id: player.id,
               nickname: player.nickname,
@@ -300,7 +308,7 @@ export const triggerExplosion = (bomb, map, ROOM) => {
       }
     });
 
-    setTimeout(() => {
+    const removeTid = setTimeout(() => {
       const idsToRemove = new Set(explosionCells.map((e) => e.id));
       ROOM.explosionCells = ROOM.explosionCells.filter(
         (e) => !idsToRemove.has(e.id)
@@ -317,6 +325,7 @@ export const triggerExplosion = (bomb, map, ROOM) => {
         }
       });
     }, 500);
+    ROOM.pendingTimeouts.push(removeTid);
   }
 };
 

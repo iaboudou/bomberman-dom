@@ -14,6 +14,8 @@ export class GameHandler {
     this.ROOM.powerups = [];
     this.ROOM.map = new GameMap(); ///////
     this.ROOM.map.generateBlock(); /////
+    this.ROOM.explosionCells= [];
+
     console.log("in game: ", this.ROOM.status)
 
     this.ROOM.players.forEach((p, i) => {

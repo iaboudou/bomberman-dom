@@ -19,6 +19,7 @@ export class Room {
     this.chatHandler = new ChatHandler(this);
     this.spectators = [];
     this.explosionCells= [];
+    this.pendingTimeouts = [];
   }
 
   // add new player to the room

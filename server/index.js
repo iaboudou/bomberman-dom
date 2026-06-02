@@ -72,7 +72,7 @@ function startServer() {
           case "SWITCH_TO_GAME_MAP": {
             if (!player) break;
             removeAllTimer(ROOM);
-            sendMapInfo(ROOM.players, gameHandler.ROOM.map);
+            sendMapInfo(ROOM.players, gameHandler.ROOM.map, ROOM.powerups);
             break;
           }
 
@@ -97,6 +97,13 @@ function startServer() {
 
             player.activeBombs++;
 
+            // schedule explosion
+            const tid = setTimeout(() => {
+              player.activeBombs--;
+              triggerExplosion(bomb, gameHandler.ROOM.map, ROOM);
+            }, bomb.duration);
+            ROOM.pendingTimeouts.push(tid);
+
             ROOM.bombs.push(bomb);
 
             const everyone = [
@@ -114,19 +121,17 @@ function startServer() {
               }
             });
 
-            setTimeout(() => {
-              player.activeBombs--;
-              triggerExplosion(bomb, gameHandler.ROOM.map, ROOM);
-            }, bomb.duration);
-
             break;
           }
 
           case "RESET_GAME": {
+
             removeAllTimer(ROOM);
-            map = new GameMap();
+            const map = new GameMap();
             map.generateBlock();
             ROOM.map = map;
+            ROOM.explosionCells = [];
+
             const allPlayers = [...ROOM.players, ...ROOM.spectators];
             ROOM.spectators = [];
             ROOM.players = allPlayers.map((p, i) => {
@@ -158,7 +163,8 @@ function startServer() {
             }
 
             if (ROOM.players.length <= 1) break;
-            sendMapInfo(ROOM.players, map);
+            const everyone = [...ROOM.players, ...ROOM.spectators];
+            sendMapInfo(everyone, map, ROOM.powerups);
             break;
           }
         }
