@@ -101,7 +101,6 @@ export const sendMapInfo = (players, map, powerups = []) => {
             grid: map.grid,
             tiles: map.TILES,
             classes: map.classes,
-            powerups: powerups,
             players: players.map((player) => ({
               id: player.id,
               nickname: player.nickname,
@@ -109,7 +108,7 @@ export const sendMapInfo = (players, map, powerups = []) => {
               y: player.y,
               direction: player.direction,
               remaininglife: player.remaininglife,
-              maxlife: player.maxlife,
+              number: player.number,
             })),
           },
         })
@@ -124,6 +123,7 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
 
   let nx = player.x;
   let ny = player.y;
+  let animationDuration = player.speedCooldown / player.speed;
 
   if (direction === "ArrowUp") ny--;
   if (direction === "ArrowDown") ny++;
@@ -132,8 +132,29 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
 
   // if bomb exist on the cell, the player shouldn't move
   const bombOnCell = ROOM.bombs.some((b) => b.x === nx && b.y === ny);
+  const sameCell = player.direction !== direction;
 
-  if (map.isWalkable(ny, nx) && !bombOnCell) {
+  if (sameCell) {
+    player.moove(player.x, player.y, direction)
+    const everyone = [...(ROOM?.players || []), ...(ROOM?.spectators || [])];
+    everyone.forEach((p) => {
+      if (p.socket && p.socket.readyState === 1) {
+        p.socket.send(
+          JSON.stringify({
+            type: "PLAYER_MOVED",
+            data: {
+              id: player.id,
+              x: player.x,
+              y: player.y,
+              direction: player.direction,
+              duration: animationDuration,
+              mooving: !sameCell,
+            },
+          })
+        );
+      }
+    });
+  } else if (map.isWalkable(ny, nx) && !bombOnCell) {
     player.moove(nx, ny, direction);
 
     const prevPowerups = ROOM.powerups;
@@ -208,6 +229,8 @@ export const MoovePlayer = (direction, player, map, ROOM) => {
               x: player.x,
               y: player.y,
               direction: player.direction,
+              duration: animationDuration,
+              mooving: !sameCell,
               ...(powerupsChanged && { powerups: ROOM.powerups }),
             },
           })

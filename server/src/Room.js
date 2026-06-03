@@ -18,7 +18,7 @@ export class Room {
     this.createdAt = Date.now();
     this.chatHandler = new ChatHandler(this);
     this.spectators = [];
-    this.explosionCells= [];
+    this.explosionCells = [];
     this.pendingTimeouts = [];
   }
 
@@ -74,13 +74,20 @@ export class Room {
     return [...this.players, ...this.spectators].some(p => p.nickname === nickname);
   }
 
+  getNumberForPlayer() {
+    for (let i = 1; i <= 4; i++) {
+      if (!this.players.some(p => p.number === i)) return i;
+    }
+    return 0;
+  }
+
   // start 20s waiting timing if more than 2 players
   // if a player leaves and the count drops below 2, the timer is stopped
   // if 20s passed without hitting 4 player start 10s countdown
   startWaitingTimer() {
     if (this.setInterval_waitingTimer) return;
-
-    this.waitingTime = 20;
+//////
+    this.waitingTime = 2;
     this.status = "WAITING";
 
     gameHandler.broadcastState(this.waitingTime, "waitingTime");
@@ -108,9 +115,9 @@ export class Room {
   // start 10s countdown
   startCountdown() {
     if (this.setInterval_countdownTimer) return;
-
+////////////
     this.status = "COUNTDOWN";
-    this.countdown = 10;
+    this.countdown = 2;
 
     gameHandler.broadcastState(this.countdown, "countdown");
 

@@ -1,6 +1,6 @@
 import { El, useState, router, store } from "../../mini-framework/index.js";
 import { sendResetGame } from "../services/ws.js";
-import { playerColor } from "./game.js";
+import { playerColor } from "./utils.js";
 
 export function ResultView() {
   const [winner] = useState("winner", null);

@@ -171,20 +171,86 @@ body {
     pointer-events: none;
 }
 
+
 .player {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: translate3d(var(--px), var(--py), 0);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--player-color);
-    border: 2px solid color-mix(in srgb, var(--player-color) 60%, white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: transform;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 48px;
+  background-image: url('./images/bomberman.png');
+  background-size: 608px 1374px;
+  background-position: var(--direction) var(--player);
+  will-change: transform;
+  translate: var(--px) var(--py);
+  transform: scaleX(var(--flip));
+  transition: translate var(--speed) linear;
+}
+
+.player.walking.down,
+.player.walking.up,
+.player.walking.left,
+.player.walking.right { transition: translate var(--speed) linear; }
+
+.player.walking.down  { animation: walk-down  var(--speed) steps(1) 1 forwards; }
+.player.walking.up    { animation: walk-up    var(--speed) steps(1) 1 forwards; }
+.player.walking.left  { animation: walk-left  var(--speed) steps(1) 1 forwards; }
+.player.walking.right { animation: walk-right var(--speed) steps(1) 1 forwards; }
+.player.dying         { animation: dying      1.5s   steps(1) 1 ; }
+.player.lostlife      { animation: blink      1.5s   steps(1) 1 ; }
+
+@keyframes walk-down {
+  0% {background-position-x: 0px;}
+  25% {background-position-x: -50px;}
+  50% {background-position-x: 0px;}
+  75% {background-position-x: -110px;}
+}
+
+@keyframes walk-up {
+  0% {background-position-x: -300px;}
+  25% {background-position-x: -350px;}
+  50% {background-position-x: -300px;}
+  75% {background-position-x: -410px;}
+}
+
+@keyframes walk-left {
+  0% {background-position-x: -156px;}
+  25% {background-position-x: -206px;}
+  50% {background-position-x: -156px;}
+  75% {background-position-x: -256px;}
+}
+
+@keyframes walk-right {
+  0% {background-position-x: -156px;}
+  25% {background-position-x: -206px;}
+  50% {background-position-x: -156px;}
+  75% {background-position-x: -256px;}
+}
+
+@keyframes dying {
+  0%    { background-position-x: -18px;  }
+  12.5% { background-position-x: -84px;  } 
+  25%   { background-position-x: -150px; }
+  37.5% { background-position-x: -216px; }
+  50%   { background-position-x: -282px; }
+  62.5% { background-position-x: -348px; }
+  75%   { background-position-x: -414px; }
+  87.5% { background-position-x: -480px; }
+  100%  { background-position-x: -546px; }
+}
+
+@keyframes blink {
+  0%   { opacity: 1; }
+  10%  { opacity: 0; }
+  20%  { opacity: 1; }
+  30%  { opacity: 0; }
+  40%  { opacity: 1; }
+  50%  { opacity: 0; }
+  60%  { opacity: 1; }
+  70%  { opacity: 0; }
+  80%  { opacity: 1; }
+  90%  { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 .player-label {

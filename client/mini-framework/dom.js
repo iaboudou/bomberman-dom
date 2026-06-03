@@ -88,12 +88,12 @@ export class Dom {
           this._dirty = false;
           return;
         }
-        const start = performance.now();
+        // const start = performance.now();
 
         this.mount(this._pendingVnode);
 
-        const end = performance.now();
-        console.log("mount:", (end - start).toFixed(2), "ms");
+        // const end = performance.now();
+        // console.log("mount:", (end - start).toFixed(2), "ms");
 
         this._dirty = false;
       });

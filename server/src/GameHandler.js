@@ -16,8 +16,6 @@ export class GameHandler {
     this.ROOM.map.generateBlock(); /////
     this.ROOM.explosionCells= [];
 
-    console.log("in game: ", this.ROOM.status)
-
     this.ROOM.players.forEach((p, i) => {
       const spawn = spawnPoints[i];
       p.x = spawn.x;
@@ -41,6 +39,7 @@ export class GameHandler {
               classes: this.ROOM.map.classes,
               players: this.ROOM.players.map((player) => ({
                 id: player.id,
+                number: player.number,
                 nickname: player.nickname,
                 x: player.x,
                 y: player.y,

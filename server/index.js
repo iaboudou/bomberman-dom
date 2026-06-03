@@ -43,13 +43,16 @@ function startServer() {
               break;
             }
 
-            const spawn = spawnPoints[ROOM.players.length];
+            const number = ROOM.getNumberForPlayer()
+            const spawn = spawnPoints[number-1];
             const newPlayer = new Player(
               message.data.nickname,
               ws,
               spawn.x,
-              spawn.y
+              spawn.y,
+              number,
             );
+
             const joined = ROOM.addPlayer(newPlayer);
 
             if (joined) {
@@ -92,6 +95,9 @@ function startServer() {
             if (!player) break;
             if (ROOM.spectators.some((s) => s.id === player?.id)) break;
             if (!player.canPlaceBomb()) break;
+
+            const bombOnCell = ROOM.bombs.some((b) => b.x === player.x && b.y === player.y);
+            if (bombOnCell) break;
 
             const bomb = new Bomb(player.x, player.y, player.range);
 
@@ -208,10 +214,10 @@ function startServer() {
                   data: {
                     winner: winner
                       ? {
-                          id: winner.id,
-                          nickname: winner.nickname,
-                          players: ROOM.players,
-                        }
+                        id: winner.id,
+                        nickname: winner.nickname,
+                        players: ROOM.players,
+                      }
                       : null,
                   },
                 })

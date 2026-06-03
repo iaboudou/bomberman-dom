@@ -4,11 +4,10 @@ import { initDoms, resetDoms } from "../views/game.js";
 
 // ─── State
 export let ws = null;
-export const map = {};
 
 // ─1 ── Connection
 export function startWebsocketService() {
-  ws = new WebSocket(`ws://10.1.9.8:8080`);
+  ws = new WebSocket(`ws://localhost:8080`);
   ws.onopen = () => console.log("connected to the ws");
   ws.onerror = (err) => console.log(err);
   ws.onmessage = onMessage;
@@ -55,11 +54,14 @@ const handlers = {
 
   PLAYER_MOVED(data) {
     const players = store.get("players") || [];
-    store.set({ players: players.map((p) =>
-      p.id === data.id
-        ? { ...p, x: data.x, y: data.y, direction: data.direction }
-        : p
-    )});
+
+    store.set({
+      players: players.map((p) =>
+        p.id === data.id
+          ? { ...p, x: data.x, y: data.y, direction: data.direction.toLowerCase().slice(5), ismooving: data.mooving, speed: data.duration }
+          : p
+      )
+    });
 
     if (data.powerups) {
       store.set({ powerups: data.powerups });
@@ -67,18 +69,30 @@ const handlers = {
   },
 
   MAP_INIT(data) {
-    const [nickname] = useState("nickname");
-    map.grid    = data.grid;
-    map.tiles   = data.tiles;
-    map.classes = data.classes;
-
-    store.set({ map:             new GameMap(data.grid, data.tiles) });
-    store.set({ players:         data.players });
-    store.set({ bombs:           [] });
-    store.set({ powerups:        [] });
-    store.set({ explosions:      [] });
-    store.set({ spectator:       false });
-    store.set({ winner:          null });
+    store.set({ map: new GameMap(data.grid, data.tiles) });
+    store.set({
+      players: data.players.map((p) => {
+        return {
+          id: p.id,
+          nickname: p.nickname,
+          x: p.x,
+          y: p.y,
+          life: p.remaininglife,
+          maxlife: p.maxlife,
+          direction: p.direction,
+          number: p.number,
+          mooving: false,
+          isdead: false,
+          haslostlife: false,
+          speed: 0,
+        }
+      })
+    });
+    store.set({ bombs: [] });
+    store.set({ powerups: [] });
+    store.set({ explosions: [] });
+    store.set({ spectator: false });
+    store.set({ winner: null });
 
     const [, setScreen] = useState("screen");
     setScreen("game");
@@ -103,14 +117,15 @@ const handlers = {
 
   BOMB_EXPLODED(data) {
     const bombs = store.get("bombs") || [];
+
     store.set({ bombs: bombs.filter((b) => b.id !== data.bombId) });
 
     if (data.removedBlocks.length > 0) {
       const currentMap = store.get("map");
       data.removedBlocks.forEach(({ x, y }) => {
-        currentMap.grid[y][x] = map.tiles.empty;
+        currentMap.grid[y][x] = currentMap.tiles.empty;
       });
-      store.set({ map: { ...currentMap } }); // ← nouvelle référence
+      store.set({ map: { ...currentMap } });
     }
 
     if (data.spawnedPowerups.length > 0) {
@@ -126,11 +141,11 @@ const handlers = {
     const players = store.get("players") || [];
 
     const updatedPlayers = players
-    .filter((p) => !data.deadPlayers.includes(p.id))
-    .map((p) => {
-      const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
-      return hit ? { ...p, remaininglife: hit.remaininglife } : p;
-    });
+      .filter((p) => !data.deadPlayers.includes(p.id))
+      .map((p) => {
+        const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
+        return hit ? { ...p, life: hit.remaininglife, haslostlife: true } : p;
+      });
 
     store.set({ players: updatedPlayers });
     store.set({ playersLife: updatedPlayers });
@@ -143,12 +158,17 @@ const handlers = {
   },
 
   YOU_DIED() {
-    store.set({ spectator: true });
+    const players = store.get("players") || [];
+    const [nickname] = useState("nickname");
+    store.set({
+      players: players.map(p =>
+        p.nickname === nickname ? { ...p, isdead: true, ismooving: false } : p
+      )
+    });
   },
 
   GAME_OVER(data) {
     store.set({ winner: data.winner });
-    store.set({players: data.players})
     resetDoms()
     const [, setScreen] = useState("screen");
     setScreen("result");
@@ -172,9 +192,9 @@ function send(type, data = {}) {
   }
 }
 
-export const joinGame = (nickname)  => send("JOIN",{ nickname });
+export const joinGame = (nickname) => send("JOIN", { nickname });
 export const getMap = () => send("MAP_INIT");
-export const sendMove = (direction) => send("MOVE",{ direction });
+export const sendMove = (direction) => send("MOVE", { direction });
 export const sendBomb = () => send("BOMB");
 export const sendSwitchToGameMap = () => send("SWITCH_TO_GAME_MAP");
 export const sendResetGame = () => send("RESET_GAME");
