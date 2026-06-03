@@ -13,7 +13,10 @@ export class PowerUp {
 
   apply(player) {
     if (this.type === "range") {
-      player.range++;
+      const MAX_RANGE = 6;
+      if (player.range < MAX_RANGE) {
+        player.range++;
+      }
     }
 
     if (this.type === "maxBombs") {

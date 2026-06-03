@@ -63,7 +63,7 @@ export const sendNameAlreadyUsed = (socket) => {
   socket.send(
     JSON.stringify({
       type: "ERROR",
-      data: { message: "The name already used, choose another one" },
+      data: { message: "The name already used, or invalid nickname" },
     })
   );
 };
@@ -109,6 +109,7 @@ export const sendMapInfo = (players, map, powerups = []) => {
               direction: player.direction,
               remaininglife: player.remaininglife,
               number: player.number,
+              maxlife: player.maxlife
             })),
           },
         })

@@ -44,7 +44,7 @@ function startServer() {
             }
 
             const number = ROOM.getNumberForPlayer()
-            const spawn = spawnPoints[number-1];
+            const spawn = spawnPoints[number - 1];
             const newPlayer = new Player(
               message.data.nickname,
               ws,
@@ -69,13 +69,6 @@ function startServer() {
           case "CHAT": {
             if (!player) break;
             ROOM.chatHandler.handleMessage(player.nickname, message.message);
-            break;
-          }
-
-          case "SWITCH_TO_GAME_MAP": {
-            if (!player) break;
-            removeAllTimer(ROOM);
-            sendMapInfo(ROOM.players, gameHandler.ROOM.map, ROOM.powerups);
             break;
           }
 
@@ -158,17 +151,14 @@ function startServer() {
             ROOM.bombs = [];
             ROOM.powerups = [];
 
-            ROOM.status = "WAITING";
+            ROOM.status = "INGAME"; 
             ROOM.waitingTime = 0;
             ROOM.countdown = 0;
 
-            if (ROOM.players.length === 2) {
-              ROOM.startWaitingTimer();
-            } else if (ROOM.players.length === 4) {
-              ROOM.startCountdown();
+            if (ROOM.players.length <= 1) {
+              ROOM.status = "WAITING";
+              break;
             }
-
-            if (ROOM.players.length <= 1) break;
             const everyone = [...ROOM.players, ...ROOM.spectators];
             sendMapInfo(everyone, map, ROOM.powerups);
             break;
@@ -185,6 +175,8 @@ function startServer() {
         const playerLeft = player.id;
         ROOM.removePlayer(playerLeft);
         ///
+        broadCastPlayerLeft(ROOM.players, playerLeft);
+        ////
         if (ROOM.players.length <= 1) {
           const winner = ROOM.players[0] || null;
           const everyone = [

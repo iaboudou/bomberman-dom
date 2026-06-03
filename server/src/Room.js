@@ -71,7 +71,13 @@ export class Room {
   }
 
   hasNickname(nickname) {
-    return [...this.players, ...this.spectators].some(p => p.nickname === nickname);
+    if (!/^[a-zA-Z0-9]+$/.test(nickname) || nickname.length > 10) {
+      console.log("Checking nickname:", nickname);  
+      return true
+    }
+    return [...this.players, ...this.spectators].some(p =>
+      p.nickname.toLowerCase() === nickname.toLowerCase()
+    );
   }
 
   getNumberForPlayer() {
@@ -86,8 +92,8 @@ export class Room {
   // if 20s passed without hitting 4 player start 10s countdown
   startWaitingTimer() {
     if (this.setInterval_waitingTimer) return;
-//////
-    this.waitingTime = 2;
+    //////
+    this.waitingTime = 10;
     this.status = "WAITING";
 
     gameHandler.broadcastState(this.waitingTime, "waitingTime");
@@ -115,9 +121,9 @@ export class Room {
   // start 10s countdown
   startCountdown() {
     if (this.setInterval_countdownTimer) return;
-////////////
+    ////////////
     this.status = "COUNTDOWN";
-    this.countdown = 2;
+    this.countdown = 5;
 
     gameHandler.broadcastState(this.countdown, "countdown");
 

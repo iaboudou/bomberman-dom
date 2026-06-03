@@ -196,7 +196,6 @@ export const joinGame = (nickname) => send("JOIN", { nickname });
 export const getMap = () => send("MAP_INIT");
 export const sendMove = (direction) => send("MOVE", { direction });
 export const sendBomb = () => send("BOMB");
-export const sendSwitchToGameMap = () => send("SWITCH_TO_GAME_MAP");
 export const sendResetGame = () => send("RESET_GAME");
 
 export function sendChatMessage(message) {
