@@ -12,6 +12,7 @@ export function startWebsocketService() {
   ws.onerror = (err) => console.log(err);
   ws.onmessage = onMessage;
 }
+
 // ─2 ── Message processing
 function onMessage(event) {
   let message;
@@ -26,15 +27,18 @@ function onMessage(event) {
 
 // ─3 ── Message handlers
 const handlers = {
-
   JOIN_SUCCESS(data) {
     useState("nickname", data.nickname);
-    useState("players", data.players);
+    useState("roomMates", data.roomMates);
     useState("chatMessages", []);
-    const [, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
-    setLobbyTimer({ type: null, value: 0 });
+    useState("lobbyTimer", { type: null, value: 0 });
     const [, setScreen] = useState("screen");
     setScreen("lobby");
+  },
+
+  NICKNAME_ERROR(data) {
+    const [, setError] = useState("error", null);
+    setError(data.message);
   },
 
   CHAT(data) {
@@ -43,24 +47,32 @@ const handlers = {
   },
 
   NEW_PLAYER(data) {
-    const [players, setPlayers] = useState("players");
-    setPlayers([...players, data.newPlayer]);
+    console.log(data.nickname);
+    const [players, setPlayers] = useState("roomMates");
+    setPlayers([...players, { nickname: data.nickname }]);
   },
 
   PLAYER_LEFT(data) {
     const [players, setPlayers] = useState("players");
-    setPlayers(players.filter((p) => p.id !== data.left));
+    setPlayers(players.filter((p) => p.nickname !== data.left));
   },
 
-  PLAYER_MOVED(data) {
+  PLAYER_MOOVED(data) {
     const players = store.get("players") || [];
 
     store.set({
       players: players.map((p) =>
         p.id === data.id
-          ? { ...p, x: data.x, y: data.y, direction: data.direction.toLowerCase().slice(5), ismooving: data.mooving, speed: data.duration }
-          : p
-      )
+          ? {
+              ...p,
+              x: data.x,
+              y: data.y,
+              direction: data.direction.toLowerCase().slice(5),
+              ismooving: true,
+              speed: data.duration,
+            }
+          : p,
+      ),
     });
 
     if (data.powerups) {
@@ -69,6 +81,7 @@ const handlers = {
   },
 
   MAP_INIT(data) {
+    console.log(data.players)
     store.set({ map: new GameMap(data.grid, data.tiles) });
     store.set({
       players: data.players.map((p) => {
@@ -85,8 +98,8 @@ const handlers = {
           isdead: false,
           haslostlife: false,
           speed: 0,
-        }
-      })
+        };
+      }),
     });
     store.set({ bombs: [] });
     store.set({ powerups: [] });
@@ -101,8 +114,12 @@ const handlers = {
   },
 
   WAINTING_OR_COUNTDOWN_TIMER(data) {
-    const [lobbyTimer, setLobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
-    if (lobbyTimer.type === data.type && lobbyTimer.value === data.waitingTime) return;
+    const [lobbyTimer, setLobbyTimer] = useState("lobbyTimer", {
+      type: null,
+      value: 0,
+    });
+    if (lobbyTimer.type === data.type && lobbyTimer.value === data.waitingTime)
+      return;
     setLobbyTimer({ type: data.type, value: data.waitingTime });
 
     if (data?.players) {
@@ -140,12 +157,13 @@ const handlers = {
 
     const players = store.get("players") || [];
 
-    const updatedPlayers = players
-      .filter((p) => !data.deadPlayers.includes(p.id))
-      .map((p) => {
-        const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
-        return hit ? { ...p, life: hit.remaininglife, haslostlife: true } : p;
-      });
+    const updatedPlayers = players.map((p) => {
+      if (data.deadPlayers.includes(p.id))
+        return { ...p, life: 0, isdead: true };
+      const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
+      if (hit) return { ...p, life: hit.remaininglife, haslostlife: true };
+      return p;
+    });
 
     store.set({ players: updatedPlayers });
     store.set({ playersLife: updatedPlayers });
@@ -153,23 +171,25 @@ const handlers = {
 
   REMOVE_EXPLOSIONS(data) {
     const explosions = store.get("explosions") || [];
-    const idsToRemove = new Set(data.explosionCells.map(e => e.id));
-    store.set({ explosions: explosions.filter(exp => !idsToRemove.has(exp.id)) });
+    const idsToRemove = new Set(data.explosionCells.map((e) => e.id));
+    store.set({
+      explosions: explosions.filter((exp) => !idsToRemove.has(exp.id)),
+    });
   },
 
   YOU_DIED() {
     const players = store.get("players") || [];
     const [nickname] = useState("nickname");
     store.set({
-      players: players.map(p =>
-        p.nickname === nickname ? { ...p, isdead: true, ismooving: false } : p
-      )
+      players: players.map((p) =>
+        p.nickname === nickname ? { ...p, isdead: true, ismooving: false } : p,
+      ),
     });
   },
 
   GAME_OVER(data) {
     store.set({ winner: data.winner });
-    resetDoms()
+    resetDoms();
     const [, setScreen] = useState("screen");
     setScreen("result");
   },
@@ -178,14 +198,9 @@ const handlers = {
     const [, setScreen] = useState("screen");
     setScreen("game");
   },
-
-  ERROR(data) {
-    const [, setError] = useState("error", null);
-    setError(data.message);
-  },
 };
 
-// ─4 ── Actions 
+// ─4 ── Actions
 function send(type, data = {}) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type, data }));
@@ -194,13 +209,12 @@ function send(type, data = {}) {
 
 export const joinGame = (nickname) => send("JOIN", { nickname });
 export const getMap = () => send("MAP_INIT");
-export const sendMove = (direction) => send("MOVE", { direction });
+export const sendMove = (direction) => send("MOOVE", { direction });
 export const sendBomb = () => send("BOMB");
 export const sendResetGame = () => send("RESET_GAME");
 
 export function sendChatMessage(message) {
-  const [nickname] = useState("nickname");
   if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ type: "CHAT", message, nickname }));
+    ws.send(JSON.stringify({ type: "CHAT", data: { message } }));
   }
 }

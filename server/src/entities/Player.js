@@ -1,3 +1,5 @@
+import { MAX_BOMBS, MAX_RANGE, MAX_SPEED } from "../utils/Const.js";
+
 export class Player {
   constructor(nickname, socket, x, y, number) {
     this.id = crypto.randomUUID();
@@ -5,7 +7,7 @@ export class Player {
     this.nickname = nickname;
     this.x = x;
     this.y = y;
-    this.number = number
+    this.number = number;
     this.maxlife = 3;
     this.remaininglife = 3;
     this.maxBombs = 1;
@@ -14,14 +16,14 @@ export class Player {
     this.speed = 1;
     this.direction = "down";
     this._lastMove = 0;
-    this.speedCooldown = 400 //ms
+    this.speedCooldown = 400; //ms
   }
 
   moove(x, y, direction) {
-    if (x !== this.x || y !== this.y) this._lastMove = Date.now();
     this.x = x;
     this.y = y;
     this.direction = direction;
+    this._lastMove = Date.now();
   }
 
   canMove() {
@@ -41,4 +43,9 @@ export class Player {
     return this.remaininglife <= 0;
   }
 
+  takePowerUp(pu) {
+    if (pu === "range" && this.range < MAX_RANGE) this.range++;
+    else if (pu === "maxBombs" && this.maxBombs < MAX_BOMBS) player.maxBombs++;
+    else if (pu === "speed" && this.speed < MAX_SPEED) player.speed++;
+  }
 }

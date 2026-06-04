@@ -1,12 +1,19 @@
-import { DEFAULT_DENSITY, DEFAULT_GRID, TILES } from "./Const.js";
+import {
+  DEFAULT_DENSITY,
+  DEFAULT_GRID,
+  TILES,
+  POWERUP_CHANCE,
+  POWERUP_TYPES,
+} from "../utils/Const.js";
+import { PowerUp } from "./PowerUp.js";
 
 export class GameMap {
   // Initializes the server-side map with dimensions and a grid
   constructor() {
     this.TILES = TILES;
     this.blockProbability = DEFAULT_DENSITY;
-    this.grid = DEFAULT_GRID;
-     this.classes = {
+    this.grid = this.generateBlock(DEFAULT_GRID.map((row) => [...row]));
+    this.classes = {
       [TILES.empty]: "empty",
       [TILES.wall]: "wall",
       [TILES.block]: "block",
@@ -14,15 +21,16 @@ export class GameMap {
   }
 
   // Generates random destructible blocks where it can be
-  generateBlock() {
-    const grid = this.grid;
+  generateBlock(grid) {
     const ROWS = grid.length - 1; // max row index
     const COLS = grid.at(0).length - 1; // max column index
 
-    this.grid = grid.map((line, row) => {
+    return grid.map((line, row) => {
       return line.map((cell, col) => {
         if (cell === 0 && !this.isInSpawnZone(row, col, ROWS, COLS)) {
-          return Math.random() < this.blockProbability ? this.TILES.block : this.TILES.empty;
+          return Math.random() < this.blockProbability
+            ? this.TILES.block
+            : this.TILES.empty;
         }
         return cell;
       });
@@ -62,5 +70,11 @@ export class GameMap {
   // Removes a destructible block from the grid (after explosion)
   removeBlock(row, col) {
     this.grid[row][col] = this.TILES.empty;
+
+    if (Math.random() > POWERUP_CHANCE) return null;
+
+    const type =
+      POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+    return new PowerUp(col, row, type);
   }
 }

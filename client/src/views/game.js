@@ -1,7 +1,19 @@
-import { El, Dom, events, store, getEl, useState } from "../../mini-framework/index.js";
+import {
+  El,
+  Dom,
+  events,
+  store,
+  getEl,
+  useState,
+} from "../../mini-framework/index.js";
 import { GameMap } from "../entities/Map.js";
 import { sendMove, sendBomb, ws } from "../services/ws.js";
-import { getPlayerClass, getPlayerPosition, playerColor, playerDirection } from "./utils.js";
+import {
+  getPlayerClass,
+  getPlayerPosition,
+  playerColor,
+  playerDirection,
+} from "./utils.js";
 
 let uiDom, gridDom, playersDom, bombsDom, powerupsDom, explosionsDom;
 let domsInitialized = false;
@@ -18,7 +30,15 @@ export function initDoms() {
   const powerupsEl = getEl("#powerups");
   const explosionsEl = getEl("#explosions");
 
-  if (!uiEl || !gridEl || !playersEl || !bombsEl || !powerupsEl || !explosionsEl) return;
+  if (
+    !uiEl ||
+    !gridEl ||
+    !playersEl ||
+    !bombsEl ||
+    !powerupsEl ||
+    !explosionsEl
+  )
+    return;
 
   domsInitialized = true;
 
@@ -31,7 +51,6 @@ export function initDoms() {
 
   const onPlayers = () => playersDom.scheduleMount(renderPlayers());
   const onPlayersLife = () => uiDom.scheduleMount(renderUI());
-  const onSpectator = () => uiDom.scheduleMount(renderUI());
   const onBombs = () => bombsDom.scheduleMount(renderBombs());
   const onPowerups = () => powerupsDom.scheduleMount(renderPowerups());
   const onExplosions = () => explosionsDom.scheduleMount(renderExplosions());
@@ -39,7 +58,6 @@ export function initDoms() {
 
   subs.push(["players", onPlayers]);
   subs.push(["playersLife", onPlayersLife]);
-  subs.push(["spectator", onSpectator]);
   subs.push(["bombs", onBombs]);
   subs.push(["powerups", onPowerups]);
   subs.push(["explosions", onExplosions]);
@@ -72,20 +90,35 @@ export function resetDoms() {
 
 function renderUI() {
   const players = store.get("players") || [];
-  const isSpectator = store.get("spectator") || false;
 
-  return El("fragment", {},
-    El("div", { class: "ui-players" },
+  return El(
+    "fragment",
+    {},
+    El(
+      "div",
+      { class: "ui-players" },
       players.map((p) =>
-        El("div", { key: p.id, class: "ui-player", style: `--player-color: ${playerColor(p.nickname)}` },
+        El(
+          "div",
+          {
+            key: p.id,
+            class: "ui-player",
+            style: `--player-color: ${playerColor(p.nickname)}`,
+          },
           El("span", { class: "ui-avatar" }, p.nickname[0].toUpperCase()),
-          El("div", { class: "ui-lives" },
+          El(
+            "div",
+            { class: "ui-lives" },
             Array.from({ length: p.maxlife }, (_, i) =>
-              El("span", { class: `ui-heart ${i < p.life ? "alive" : "lost"}` }, "♥")
-            )
-          )
-        )
-      )
+              El(
+                "span",
+                { class: `ui-heart ${i < p.life ? "alive" : "lost"}` },
+                "♥",
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }
@@ -93,7 +126,9 @@ function renderUI() {
 function renderGrid() {
   const Map = store.get("map");
 
-  return El("fragment", {},
+  return El(
+    "fragment",
+    {},
     Map.grid
       .flat()
       .map((cell, i) =>
@@ -105,7 +140,9 @@ function renderGrid() {
 function renderPlayers() {
   const players = store.get("players") || [];
 
-  return El("fragment", {},
+  return El(
+    "fragment",
+    {},
     players.map((p) =>
       El("div", {
         key: p.id,
@@ -119,82 +156,86 @@ function renderPlayers() {
               --speed: ${p.speed}ms`,
         onanimationend: () => {
           const currentPlayers = store.get("players") || [];
-          const currentP = currentPlayers.find(saved => saved.id === p.id);
+          const currentP = currentPlayers.find((saved) => saved.id === p.id);
           if (!currentP) return;
 
           if (currentP.isdead) {
-            store.set({ spectator: true });
+            store.set({players : currentPlayers.filter((saved) => saved.id !== p.id)});
           } else if (currentP.haslostlife) {
             store.set({
-              players: currentPlayers.map(saved =>
-                saved.id === p.id ? { ...saved, haslostlife: false } : saved
-              )
+              players: currentPlayers.map((saved) =>
+                saved.id === p.id ? { ...saved, haslostlife: false } : saved,
+              ),
             });
           } else {
             store.set({
-              players: currentPlayers.map(saved =>
-                saved.id === p.id ? { ...saved, ismooving: false } : saved
-              )
+              players: currentPlayers.map((saved) =>
+                saved.id === p.id ? { ...saved, ismooving: false } : saved,
+              ),
             });
           }
         },
-      },
-      )
-    )
+      }),
+    ),
   );
 }
 
 function renderBombs() {
   const bombs = store.get("bombs") || [];
 
-  return El("fragment", {},
+  return El(
+    "fragment",
+    {},
     bombs.map((b) =>
       El("div", {
         key: b.id,
         class: "bomb",
         style: `--px: ${b.x * 48}px; --py: ${b.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
 function renderPowerups() {
   const powerups = store.get("powerups") || [];
 
-  return El("fragment", {},
+  return El(
+    "fragment",
+    {},
     powerups.map((pu) =>
       El("div", {
         key: pu.id,
         class: `powerup ${pu.type}`,
         style: `--px: ${pu.x * 48}px; --py: ${pu.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
 function renderExplosions() {
   const explosions = store.get("explosions") || [];
 
-  return El("fragment", {},
+  return El(
+    "fragment",
+    {},
     explosions.map((e) =>
       El("div", {
         key: e.id,
         class: `explosion ${e.position}`,
         style: `--px: ${e.x * 48}px; --py: ${e.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
 export function GameView() {
-  const [nickname] = useState("nickname")
-  const isSpectator = store.get("spectator") || false;
+  const [nickname] = useState("nickname");
   const players = store.get("players") || [];
-  const currentPlayer = players.find(p => p.nickname === nickname);
+  const currentPlayer = players.find((p) => p.nickname === nickname);
 
   const handleMove = (e) => {
-    console.log(currentPlayer)
-    if (isSpectator || currentPlayer.ismooving || currentPlayer.haslostlife) return;
+    if (!currentPlayer || currentPlayer.ismooving || currentPlayer.haslostlife)
+      return;
     e.preventDefault();
 
     if (e.key === " ") {
@@ -202,22 +243,23 @@ export function GameView() {
       return;
     }
 
-    const newDirection = e.key.toLowerCase().slice(5);
-
     const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
     if (validKeys.includes(e.key)) sendMove(e.key);
-
   };
 
-  return El("div", {
-    id: "app",
-    tabindex: "0",
-    autofocus: true,
-    onKeydown: (e) => handleMove(e),
-  },
+  return El(
+    "div",
+    {
+      id: "app",
+      tabindex: "0",
+      autofocus: true,
+      onKeydown: (e) => handleMove(e),
+    },
     El("div", { id: "ui" }),
-    El("div", { id: "map" },
+    El(
+      "div",
+      { id: "map" },
       El("div", { class: "grid" }),
       El("div", { id: "players" }),
       El("div", { id: "bombs" }),

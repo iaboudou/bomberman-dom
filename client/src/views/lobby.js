@@ -2,14 +2,16 @@ import { El, useState } from "../../mini-framework/index.js";
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView(props) {
-  const [lobbyTimer] = useState("lobbyTimer", { type: null, value: 0 });
-  const [playersList] = useState("players", []); // list of players in the lobby
-  const [chatMessages] = useState("chatMessages", []); // chat messages in the lobby
+  const [lobbyTimer] = useState("lobbyTimer");
+  const [roomMates] = useState("roomMates"); // list of players in the lobby
+  const [chatMessages] = useState("chatMessages"); // chat messages in the lobby
+
   const waitingTime = lobbyTimer.type === "waitingTime" ? lobbyTimer.value : 0;
   const countdown = lobbyTimer.type === "countdown" ? lobbyTimer.value : 0;
-  const hasTimer = (waitingTime > 0 && playersList.length >= 2) || countdown > 0;
-  const timerLabel = waitingTime > 0 && playersList.length >= 2 ? "Waiting time" : "Game starts in ";
-  const timerValue = waitingTime > 0 && playersList.length >= 2 ? waitingTime : countdown;
+  const hasTimer = (waitingTime > 0 && roomMates.length >= 2) || countdown > 0;
+  const timerLabel = waitingTime > 0 && roomMates.length >= 2 ? "Waiting time" : "Game starts in ";
+  const timerValue = waitingTime > 0 && roomMates.length >= 2 ? waitingTime : countdown;
+
   // Handle chat message submission
   function handleChatSubmit(e) {
     e.preventDefault();
@@ -32,31 +34,28 @@ export function LobbyView(props) {
         "div",
         {},
         El("h1", {}, "BOMBERMAN"),
-        El("p", {}, `Players: ${playersList.length}/4`),
+        El("p", {}, `Players: ${roomMates.length}/4`),
         El("p", { class: `status-label ${hasTimer ? "" : "is-hidden"}` }, timerLabel),
         El("div", { class: `status-box ${hasTimer ? "" : "is-hidden"}` }, hasTimer ? `${timerValue}s` : "0s"),
         El(
           "p",
-          { class: `waiting-message ${playersList.length < 2 ? "" : "is-hidden"}` },
+          { class: `waiting-message ${roomMates.length < 2 ? "" : "is-hidden"}` },
           "Waiting for more players to join...",
         ),
         El(
           "div",
           { class: "players-list" },
           El("h3", {}, "Connected Players"),
-          ...(playersList || []).map((player) =>
+          roomMates.map((player) =>
             El(
               "div",
-              { key: player.id, class: "player-item" },
+              { key: player.nickname, class: "player-item" },
               El("span", {}),
               ` ${player.nickname}`,
             ),
           ),
         ),
       ),
-
-      El("div", {}),
-
       El(
         "div",
         {},
@@ -64,9 +63,7 @@ export function LobbyView(props) {
         El(
           "div",
           { class: "chat-messages" },
-          ...chatMessages
-            .slice(-20)
-            .map((msg) =>
+          chatMessages.map((msg) =>
               El(
                 "div",
                 { key: msg.id, class: "chat-message" },
