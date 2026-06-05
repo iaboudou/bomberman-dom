@@ -17,6 +17,7 @@ export class Player {
     this.direction = "down";
     this._lastMove = 0;
     this.speedCooldown = 400; //ms
+    this.lastTimeDamaged = 0;
   }
 
   moove(x, y, direction) {
@@ -28,15 +29,20 @@ export class Player {
 
   canMove() {
     const cooldown = this.speedCooldown / this.speed; // speed 1 = 400ms, speed 2 = 200ms
-    return Date.now() - this._lastMove >= cooldown;
+    return Date.now() - this._lastMove >= cooldown && Date.now() - this.lastTimeDamaged >= 1500;
   }
 
   canPlaceBomb() {
     return this.activeBombs < this.maxBombs;
   }
 
+  canBeDamaged() {
+    return Date.now() - this.lastTimeDamaged >= 1500;
+  }
+
   loseLife() {
     this.remaininglife--;
+    this.lastTimeDamaged = Date.now();
   }
 
   isDead() {
@@ -44,8 +50,8 @@ export class Player {
   }
 
   takePowerUp(pu) {
-    if (pu === "range" && this.range < MAX_RANGE) this.range++;
-    else if (pu === "maxBombs" && this.maxBombs < MAX_BOMBS) player.maxBombs++;
-    else if (pu === "speed" && this.speed < MAX_SPEED) player.speed++;
+    if (pu.type === "range" && this.range < MAX_RANGE) this.range++;
+    else if (pu.type === "maxBombs" && this.maxBombs < MAX_BOMBS) this.maxBombs++;
+    else if (pu.type === "speed" && this.speed < MAX_SPEED) this.speed++;
   }
 }

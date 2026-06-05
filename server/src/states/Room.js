@@ -11,13 +11,23 @@ export class Room {
     this.players = [];
     this.bombs = []; // bombs currently placed on the map by the players
     this.powerups = [];
-    this.status = "WAITING"; // WAITING - COUNTDOWN - INGAME - FINISHED
+    this.status = "WAITING"; // WAITING - COUNTDOWN - INGAME
     this.countdown = 0; // 10 seconds remaining in the countdown before the game starts
     this.waitingTime = 0; // time waiting for more players to join
     this.setInterval_waitingTimer = null;
     this.setInterval_countdownTimer = null;
     this.explosionCells = [];
     this.pendingTimeouts = [];
+  }
+
+  endGame(winner) {
+    this.players.forEach((p) => {
+      sendTofront(p.socket, "GAME_OVER", {
+        winner,
+      });
+    });
+
+    this.reset()
   }
 
   //add someone in the room
@@ -35,17 +45,13 @@ export class Room {
     if (this.clients.length === 2 && this.status === "WAITING") {
       this.startWaitingTimer();
     } else if (this.clients.length === 4) {
-      if (this.setInterval_waitingTimer) {
-        clearInterval(this.setInterval_waitingTimer);
-        this.setInterval_waitingTimer = null;
-        this.waitingTime = 0;
-      }
-
+      this.removeWaitingTimer();
       this.startCountdown();
     }
 
     return "success";
   }
+
 
   // check if the room has reached 4 players
   isFull() {
@@ -64,8 +70,19 @@ export class Room {
     }
   }
 
+  sendTimer(type) {
+    const receivers = this.clients.length > 0 ? this.clients : this.players;
+
+    receivers.forEach((c) =>
+      sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
+        waitingTime: this[type],
+        type,
+      }),
+    );
+
+  }
+
   // start 20s waiting timing if more than 2 players
-  // if a player leaves and the count drops below 2, the timer is stopped
   // if 20s passed without hitting 4 player start 10s countdown
   startWaitingTimer() {
     if (this.setInterval_waitingTimer) return;
@@ -73,36 +90,33 @@ export class Room {
     this.waitingTime = 10;
     this.status = "WAITING";
 
-    this.clients.forEach((c) =>
-      sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
-        waitingTime: this.waitingTime,
-        type: "waitingTime",
-      }),
-    );
+    this.sendTimer("waitingTime")
 
     this.setInterval_waitingTimer = setInterval(() => {
-      if (this.clients.length < 2) {
-        clearInterval(this.setInterval_waitingTimer);
-        this.setInterval_waitingTimer = null;
-        this.waitingTime = 0;
-        return;
-      }
-
       if (this.waitingTime <= 1) {
-        clearInterval(this.setInterval_waitingTimer);
-        this.setInterval_waitingTimer = null;
-        this.waitingTime = 0;
+        this.removeWaitingTimer()
         this.startCountdown();
       } else {
         this.waitingTime--;
-        this.clients.forEach((c) =>
-          sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
-            waitingTime: this.waitingTime,
-            type: "waitingTime",
-          }),
-        );
+        this.sendTimer("waitingTime")
       }
     }, 1000);
+  }
+
+  removeWaitingTimer() {
+    if (this.setInterval_waitingTimer) {
+      clearInterval(this.setInterval_waitingTimer);
+      this.setInterval_waitingTimer = null;
+      this.waitingTime = 0;
+    }
+  }
+
+  removeCountDown(rollback = false) {
+    if (this.setInterval_countdownTimer) {
+      clearInterval(this.setInterval_countdownTimer);
+      this.setInterval_countdownTimer = null;
+      this.countdown = 0;
+    }
   }
 
   // start 10s countdown
@@ -113,46 +127,15 @@ export class Room {
     this.status = "COUNTDOWN";
     this.countdown = 5;
 
-    this.players.forEach((c) =>
-      sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
-        waitingTime: this.countdown,
-        type: "countdown",
-      }),
-    );
+    this.sendTimer("countdown")
 
     this.setInterval_countdownTimer = setInterval(() => {
-      if (this.players.length < 2) {
-        clearInterval(this.setInterval_countdownTimer);
-        this.setInterval_countdownTimer = null;
-        this.status = "WAITING";
-        this.countdown = 0;
-        this.clients = this.players.map((p) => {
-          return { nickname: p.nickname, socket: p.socket };
-        });
-        this.players = [];
-        this.clients.forEach((c) =>
-          sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
-            waitingTime: this.countdown,
-            type: "countdown",
-          }),
-        );
-        return;
-      }
-
       if (this.countdown <= 1) {
-        clearInterval(this.setInterval_countdownTimer);
-        this.setInterval_countdownTimer = null;
-        this.countdown = 0;
-        this.status = "INGAME";
+        this.removeCountDown()
         this.startGame();
       } else {
         this.countdown--;
-        this.players.forEach((c) =>
-          sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
-            waitingTime: this.countdown,
-            type: "countdown",
-          }),
-        );
+        this.sendTimer("countdown")
       }
     }, 1000);
   }
@@ -160,7 +143,7 @@ export class Room {
   initGameState() {
     const newPlayers = this.clients.map((c, i) => {
       const spawn = spawnPoints[i];
-      return new Player(c.nickname, c.socket, spawn.x, spawn.y, i);
+      return new Player(c.nickname, c.socket, spawn.x, spawn.y, i + 1);
     });
 
     this.clients = [];
@@ -169,6 +152,8 @@ export class Room {
   }
 
   startGame() {
+    this.status = "INGAME";
+
     this.players.forEach((p, i) => {
       sendTofront(p.socket, "MAP_INIT", {
         grid: this.map.grid,
@@ -188,9 +173,58 @@ export class Room {
     });
   }
 
+  reset() {
+    this.map = null;
+    this.clients = [];
+    this.players = [];
+    this.bombs = [];
+    this.powerups = [];
+    this.status = "WAITING";
+    this.countdown = 0;
+    this.waitingTime = 0;
+    this.setInterval_waitingTimer = null;
+    this.setInterval_countdownTimer = null;
+    this.explosionCells = [];
+    this.pendingTimeouts.forEach(id => clearTimeout(id));
+    this.pendingTimeouts = [];
+  }
+
   // remove the player from the room in case of disconnect
   removeClient(nickname) {
     this.players = this.players.filter((p) => p.nickname !== nickname);
     this.clients = this.clients.filter((p) => p.nickname !== nickname);
+
+    if (this.clients.length === 0 && this.players.length === 0) {
+      this.reset()
+      return
+    }
+
+    const receivers = this.clients.length > 0 ? this.clients : this.players
+    receivers.forEach(r => sendTofront(r.socket, "PLAYER_LEFT", { left: nickname }))
+    switch (this.status) {
+      case "WAITING": {
+        if (this.clients.length < 2) {
+          this.removeWaitingTimer();
+          this.sendTimer("waitingTime");
+        }
+        break; // ← manquait
+      }
+      case "COUNTDOWN": {
+        if (this.players.length < 2) {
+          this.removeCountDown();
+          this.players.forEach(p => this.clients.push({ nickname: p.nickname, socket: p.socket }));
+          this.players = [];
+          this.status = "WAITING";
+          this.sendTimer("waitingTime");
+        }
+        break; // ← manquait
+      }
+      case "INGAME": {
+        if (this.players.length < 2) {
+          this.endGame(this.players[0] || null);
+        }
+        break;
+      }
+    }
   }
 }

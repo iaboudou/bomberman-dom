@@ -1,7 +1,9 @@
 import { WebSocketServer } from "ws";
 import { Room } from "./src/states/Room.js";
-import { broadcastNewPlayer, sendTofront } from "./src/utils/Utils.js";
-import { Bomb } from "./src/entities/Bomb.js";
+import { MoovePlayer } from "./src/logic/moove.js";
+import { joinGame } from "./src/logic/join.js";
+import { dropBomb } from "./src/logic/dropBomb.js";
+import { broadcastMessage } from "./src/logic/chat.js";
 
 function startServer() {
   const room = new Room(crypto.randomUUID());
@@ -16,62 +18,30 @@ function startServer() {
 
         switch (type) {
           case "JOIN": {
-            const result = room.addClient(data.nickname, ws);
-
-            if (result === "success") {
-              sendTofront(ws, "JOIN_SUCCESS", {
-                nickname: data.nickname,
-                roomMates: room.clients.map((c) => ({
-                  nickname: c.nickname,
-                })),
-              });
-              clientName = data.nickname;
-              broadcastNewPlayer(room.clients, clientName);
-            } else sendTofront(ws, "NICKNAME_ERROR", { message: result });
-
+            const success = joinGame(room, data.nickname, ws)
+            if (success) clientName = data.nickname;
             break;
           }
 
           case "CHAT": {
-            let receivers;
-
-            if (room.status === "WAITING") receivers = room.clients;
-            else if (room.status === "COUNTDOWN") receivers = room.players;
-            else break;
-
-            broadcastMessage(clientName, data.message, receivers);
+            broadcastMessage(clientName, data.message, room);
             break;
           }
 
           case "MOOVE": {
-            const player = room.players.find((p) => (p.nickname = clientName));
+            const player = room.players.find((p) => (p.nickname === clientName));
             MoovePlayer(data.direction, player, room);
+            break;
           }
 
           case "BOMB": {
-            const player = room.players.find((p) => (p.nickname = clientName));
-            if (!player.canPlaceBomb() || player.isDead()) break;
-
-            const bombOnCell = ROOM.bombs.some(
-              (b) => b.x === player.x && b.y === player.y,
-            );
-
-            if (bombOnCell) break;
-
-            const bomb = new Bomb(player.x, player.y, player.range);
-
-            player.activeBombs++;
-
-            const tid = setTimeout(() => {
-              player.activeBombs--;
-              triggerExplosion(bomb, gameHandler.ROOM.map, ROOM);
-            }, bomb.duration);
-            ROOM.pendingTimeouts.push(tid);
-
-            room.players.forEach((p) =>
-              sendTofront(p.socket, "BOMB_PLACED", { bomb }),
-            );
+            const player = room.players.find((p) => (p.nickname === clientName));
+            dropBomb(room, player)
             break;
+          }
+
+          case "PLAY_AGAIN": {
+            
           }
         }
       } catch (err) {
