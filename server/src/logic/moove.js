@@ -31,7 +31,9 @@ export const MoovePlayer = (direction, player, ROOM) => {
     (e) => e.x === nx && e.y === ny,
   );
 
-  if (isInExplosion && player.canBeDamaged()) player.loseLife();
+  if (isInExplosion && player.canBeDamaged()){
+    player.loseLife();
+  }
 
   const alivePlayers = ROOM.players.filter((p) => !p.isDead());
 

@@ -18,8 +18,13 @@ function startServer() {
 
         switch (type) {
           case "JOIN": {
-            const success = joinGame(room, data.nickname, ws)
-            if (success) clientName = data.nickname;
+            const success = joinGame(room, data.nickname, ws);
+            if (success) {
+              clientName = data.nickname;
+              if (room.clients.length === 4) {
+                room.startCountdown();
+              }
+            }
             break;
           }
 
@@ -29,19 +34,15 @@ function startServer() {
           }
 
           case "MOOVE": {
-            const player = room.players.find((p) => (p.nickname === clientName));
+            const player = room.players.find((p) => p.nickname === clientName);
             MoovePlayer(data.direction, player, room);
             break;
           }
 
           case "BOMB": {
-            const player = room.players.find((p) => (p.nickname === clientName));
-            dropBomb(room, player)
+            const player = room.players.find((p) => p.nickname === clientName);
+            dropBomb(room, player);
             break;
-          }
-
-          case "PLAY_AGAIN": {
-            
           }
         }
       } catch (err) {
@@ -49,7 +50,11 @@ function startServer() {
       }
     });
 
-    ws.on("close", () => room.removeClient(clientName));
+    ws.on("close", () => {
+      if (clientName) {
+        room.removeClient(clientName);
+      }
+    });
   });
 }
 

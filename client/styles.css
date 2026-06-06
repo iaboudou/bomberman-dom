@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 /* globale */
 * {
@@ -13,7 +13,7 @@ body {
   min-height: 100vh;
   background-color: #121016;
   color: #fff;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   overflow-x: hidden;
   image-rendering: pixelated;
 }
@@ -21,7 +21,6 @@ body {
 /* game page */
 
 #app {
-  border: 2px solid white;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -31,6 +30,33 @@ body {
   gap: 8px;
 }
 
+#app:focus {
+  outline: none;
+}
+
+/*  */
+.game-title {
+  text-align: center;
+  font-size: 2rem;
+  color: white;
+  margin: 0 0 16px 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+  will-change: transform, opacity;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateZ(0) translateY(0);
+  }
+  50% {
+    transform: translateZ(0) translateY(-8px);
+  }
+}
+/*  */
+
 #ui {
   display: flex;
   align-items: center;
@@ -39,8 +65,8 @@ body {
   min-height: 48px;
   width: 816px;
   background: #1a1a2e;
-  border: 1px solid white;
 }
+
 
 .ui-players {
   display: flex;
@@ -83,7 +109,6 @@ body {
 }
 
 #map {
-  border: 2px solid white;
   width: 816px;
   /* 17 × 16 × 3  */
   height: 624px;
@@ -103,7 +128,7 @@ body {
   width: 48px;
   height: 48px;
   image-rendering: pixelated;
-  background-image: url('./images/stage.png');
+  background-image: url("./images/stage.png");
   background-size: 1344px 720px;
   /* 448×240 × 3 */
 }
@@ -120,7 +145,6 @@ body {
   background-position: -912px -144px;
 }
 
-
 #players,
 #bombs,
 #powerups,
@@ -131,14 +155,13 @@ body {
   pointer-events: none;
 }
 
-
 .player {
   position: absolute;
   top: 0;
   left: 0;
   width: 48px;
   height: 48px;
-  background-image: url('./images/bomberman.png');
+  background-image: url("./images/bomberman.png");
   background-size: 608px 1374px;
   background-position: var(--direction) var(--player);
   will-change: transform;
@@ -346,7 +369,7 @@ body {
   height: 48px;
   translate: var(--px) var(--py);
   image-rendering: pixelated;
-  background-image: url('./images/tilesets.png');
+  background-image: url("./images/tilesets.png");
   background-size: 2037px 1119px;
   background-repeat: no-repeat;
   animation: bomb-pulse 0.8s steps(1) infinite;
@@ -374,7 +397,7 @@ body {
   translate: var(--px) var(--py);
   image-rendering: pixelated;
   z-index: 1;
-  background-image: url('./images/power_ups.png');
+  background-image: url("./images/power_ups.png");
   background-size: 336px 480px;
   background-repeat: no-repeat;
 }
@@ -391,14 +414,13 @@ body {
   background-position: -24px -111px;
 }
 
-
 .explosion {
   position: absolute;
   width: 48px;
   height: 48px;
   translate: var(--px) var(--py);
   image-rendering: pixelated;
-  background-image: url('./images/tilesets.png');
+  background-image: url("./images/tilesets.png");
   background-size: 2037px 1119px;
   background-repeat: no-repeat;
   animation: expl-anim 0.5s steps(1) forwards;
@@ -479,7 +501,6 @@ body {
   --f4: -1836px -357px;
 }
 
-
 .explosion.up-end {
   --f0: -1632px -357px;
   --f1: -1683px -357px;
@@ -513,7 +534,7 @@ body {
 .playerLoser {
   width: 48px;
   height: 48px;
-  background-image: url('./images/bomberman.png');
+  background-image: url("./images/bomberman.png");
   background-size: 608px 1374px;
   background-repeat: no-repeat;
   image-rendering: pixelated;
@@ -541,15 +562,20 @@ body {
 }
 
 .result-btn:hover {
-  border-color:  aliceblue;
-  color:  aliceblue;
+  border-color: aliceblue;
+  color: aliceblue;
 }
 
 /* welcome page */
 
 #app:has(.welcome-screen) {
   border: none !important;
-  background: radial-gradient(circle at 50% 0%, #1a1a24 0%, #050505 80%, #000000 100%) !important;
+  background: radial-gradient(
+    circle at 50% 0%,
+    #1a1a24 0%,
+    #050505 80%,
+    #000000 100%
+  ) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -557,7 +583,7 @@ body {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-family: "Inter", system-ui, -apple-system, sans-serif !important;
 }
 
 .welcome-screen {
@@ -581,7 +607,11 @@ body {
   box-sizing: border-box;
   position: relative;
 
-  background: linear-gradient(145deg, rgba(28, 28, 33, 0.96) 0%, rgba(8, 8, 10, 0.98) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(28, 28, 33, 0.96) 0%,
+    rgba(8, 8, 10, 0.98) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
@@ -599,16 +629,27 @@ body {
   border-radius: 20px;
 }
 
+/*  */
 .welcome-title {
-  font-weight: 800;
   font-size: 42px;
-  letter-spacing: -1px;
-  margin: 0;
   text-transform: uppercase;
-  background: linear-gradient(90deg, #fff, #aaa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition: transform 0.3s ease;
+  animation: float 3s ease-in-out infinite;
+  will-change: transform;
 }
+@keyframes float {
+  0%,
+  100% {
+    transform: translateZ(0) translateY(0);
+  }
+  50% {
+    transform: translateZ(0) translateY(-8px);
+  }
+}
+/*  */
 
 .welcome-subtitle {
   color: #888;
@@ -620,7 +661,12 @@ body {
 .welcome-divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   margin: 8px 0;
 }
 
@@ -682,13 +728,16 @@ body {
   border: 1px solid rgba(255, 51, 102, 0.2);
 }
 
-
-
 /* lobby page  */
 
 #app:has(.lobby-screen) {
   border: none !important;
-  background: radial-gradient(circle at 50% 0%, #1a1a24 0%, #050505 80%, #000000 100%) !important;
+  background: radial-gradient(
+    circle at 50% 0%,
+    #1a1a24 0%,
+    #050505 80%,
+    #000000 100%
+  ) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -696,7 +745,7 @@ body {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-family: "Inter", system-ui, -apple-system, sans-serif !important;
 }
 
 .lobby-screen {
@@ -709,12 +758,17 @@ body {
   padding: 40px;
   gap: 50px;
 
-  background: linear-gradient(145deg, rgba(28, 28, 33, 0.96) 0%, rgba(8, 8, 10, 0.98) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(28, 28, 33, 0.96) 0%,
+    rgba(8, 8, 10, 0.98) 100%
+  );
 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -724,27 +778,51 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(120, 160, 72, 0.04), transparent 55%);
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(120, 160, 72, 0.04),
+    transparent 55%
+  );
   pointer-events: none;
   z-index: 0;
 }
+
+/*  */
+.lobby-screen h1 {
+  font-size: 3rem;
+  text-transform: uppercase;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateZ(0) translateY(0);
+  }
+  50% {
+    transform: translateZ(0) translateY(-8px);
+  }
+}
+/*  */
 
 .lobby-container {
   display: contents;
 }
 
-.lobby-container>div:first-child {
+.lobby-container > div:first-child {
   display: flex;
   flex-direction: column;
   gap: 24px;
   z-index: 1;
 }
 
-.lobby-container>div:nth-child(2) {
+.lobby-container > div:nth-child(2) {
   display: none;
 }
 
-.lobby-container>div:last-child {
+.lobby-container > div:last-child {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -753,14 +831,20 @@ body {
   overflow: hidden;
 }
 
-.lobby-container>div:last-child::before {
+.lobby-container > div:last-child::before {
   content: "";
   position: absolute;
   left: -25px;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.1) 80%,
+    rgba(255, 255, 255, 0)
+  );
 }
 
 .lobby-container h1 {
@@ -775,7 +859,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.lobby-container>div:first-child>p:first-of-type {
+.lobby-container > div:first-child > p:first-of-type {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2px;
@@ -882,9 +966,11 @@ body {
   line-height: 1.5;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   padding: 12px 14px;
-  background: rgba(0, 0, 0, 0.3);
+   overflow-wrap: break-word;
+  word-break: break-word;
+  /* background: rgba(0, 0, 0, 0.3); */
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.03);
 }
@@ -945,8 +1031,7 @@ body {
   transition: all 0.2s;
 }
 
-
-.lobby-container>div:last-child>button {
+.lobby-container > div:last-child > button {
   background: linear-gradient(135deg, #78a048 0%, #5c7a38 100%);
   border: none;
   border-radius: 12px;

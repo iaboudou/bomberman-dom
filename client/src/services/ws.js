@@ -9,7 +9,7 @@ import { moovePlayer } from "./handlers/mooves.js";
 export let ws = null;
 
 export function startWebsocketService() {
-  ws = new WebSocket(`ws://localhost:8080`);
+  ws = new WebSocket(`ws://10.1.9.8:8080`);
   ws.onopen = () => console.log("connected to the ws");
   ws.onerror = (err) => console.error(err);
   ws.onmessage = onMessage;
@@ -41,15 +41,12 @@ const handlers = {
   "GAME_OVER": endGame,
 };
 
-function send(type, data = {}) {
+export function send(type, data = {}) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type, data }));
   }
 }
-export const joinGame = (nickname) => send("JOIN", { nickname });
-export const getMap = () => send("MAP_INIT");
-export const sendMove = (direction) => send("MOOVE", { direction });
-export const sendBomb = () => send("BOMB");
+
 export function sendChatMessage(message) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "CHAT", data: { message } }));

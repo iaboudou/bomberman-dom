@@ -27,7 +27,7 @@ export class Room {
       });
     });
 
-    this.reset()
+    this.reset();
   }
 
   //add someone in the room
@@ -46,12 +46,11 @@ export class Room {
       this.startWaitingTimer();
     } else if (this.clients.length === 4) {
       this.removeWaitingTimer();
-      this.startCountdown();
+      // this.startCountdown();
     }
 
     return "success";
   }
-
 
   // check if the room has reached 4 players
   isFull() {
@@ -60,7 +59,7 @@ export class Room {
 
   hasNickname(nickname) {
     return [...this.players, ...this.clients].some(
-      (p) => p.nickname.toLowerCase() === nickname.toLowerCase(),
+      (p) => p.nickname.toLowerCase() === nickname.toLowerCase()
     );
   }
 
@@ -77,9 +76,8 @@ export class Room {
       sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
         waitingTime: this[type],
         type,
-      }),
+      })
     );
-
   }
 
   // start 20s waiting timing if more than 2 players
@@ -87,18 +85,18 @@ export class Room {
   startWaitingTimer() {
     if (this.setInterval_waitingTimer) return;
 
-    this.waitingTime = 10;
+    this.waitingTime = 20;
     this.status = "WAITING";
 
-    this.sendTimer("waitingTime")
+    this.sendTimer("waitingTime");
 
     this.setInterval_waitingTimer = setInterval(() => {
       if (this.waitingTime <= 1) {
-        this.removeWaitingTimer()
+        this.removeWaitingTimer();
         this.startCountdown();
       } else {
         this.waitingTime--;
-        this.sendTimer("waitingTime")
+        this.sendTimer("waitingTime");
       }
     }, 1000);
   }
@@ -125,17 +123,17 @@ export class Room {
 
     this.initGameState();
     this.status = "COUNTDOWN";
-    this.countdown = 5;
+    this.countdown = 10;
 
-    this.sendTimer("countdown")
+    this.sendTimer("countdown");
 
     this.setInterval_countdownTimer = setInterval(() => {
       if (this.countdown <= 1) {
-        this.removeCountDown()
+        this.removeCountDown();
         this.startGame();
       } else {
         this.countdown--;
-        this.sendTimer("countdown")
+        this.sendTimer("countdown");
       }
     }, 1000);
   }
@@ -185,7 +183,7 @@ export class Room {
     this.setInterval_waitingTimer = null;
     this.setInterval_countdownTimer = null;
     this.explosionCells = [];
-    this.pendingTimeouts.forEach(id => clearTimeout(id));
+    this.pendingTimeouts.forEach((id) => clearTimeout(id));
     this.pendingTimeouts = [];
   }
 
@@ -195,12 +193,14 @@ export class Room {
     this.clients = this.clients.filter((p) => p.nickname !== nickname);
 
     if (this.clients.length === 0 && this.players.length === 0) {
-      this.reset()
-      return
+      this.reset();
+      return;
     }
 
-    const receivers = this.clients.length > 0 ? this.clients : this.players
-    receivers.forEach(r => sendTofront(r.socket, "PLAYER_LEFT", { left: nickname }))
+    const receivers = this.clients.length > 0 ? this.clients : this.players;
+    receivers.forEach((r) =>
+      sendTofront(r.socket, "PLAYER_LEFT", { left: nickname })
+    );
     switch (this.status) {
       case "WAITING": {
         if (this.clients.length < 2) {
@@ -212,7 +212,9 @@ export class Room {
       case "COUNTDOWN": {
         if (this.players.length < 2) {
           this.removeCountDown();
-          this.players.forEach(p => this.clients.push({ nickname: p.nickname, socket: p.socket }));
+          this.players.forEach((p) =>
+            this.clients.push({ nickname: p.nickname, socket: p.socket })
+          );
           this.players = [];
           this.status = "WAITING";
           this.sendTimer("waitingTime");
@@ -220,6 +222,7 @@ export class Room {
         break; // ← manquait
       }
       case "INGAME": {
+        console.log('all lefts')
         if (this.players.length < 2) {
           this.endGame(this.players[0] || null);
         }

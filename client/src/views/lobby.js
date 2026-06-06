@@ -1,7 +1,8 @@
 import { El, useState } from "../../mini-framework/index.js";
+import { sendChatMessage } from "../services/ws.js";
 
 // this is the lobby page where players wait for the game to start
-export function LobbyView(props) {
+export function LobbyView() {
   const [lobbyTimer] = useState("lobbyTimer");
   const [roomMates] = useState("roomMates"); // list of players in the lobby
   const [chatMessages] = useState("chatMessages"); // chat messages in the lobby
@@ -9,19 +10,12 @@ export function LobbyView(props) {
   const waitingTime = lobbyTimer.type === "waitingTime" ? lobbyTimer.value : 0;
   const countdown = lobbyTimer.type === "countdown" ? lobbyTimer.value : 0;
   const hasTimer = (waitingTime > 0 && roomMates.length >= 2) || countdown > 0;
-  const timerLabel = waitingTime > 0 && roomMates.length >= 2 ? "Waiting time" : "Game starts in ";
-  const timerValue = waitingTime > 0 && roomMates.length >= 2 ? waitingTime : countdown;
-
-  // Handle chat message submission
-  function handleChatSubmit(e) {
-    e.preventDefault();
-    const input = e.target.message;
-    const message = input.value.trim();
-    if (message && props.onChatSubmit) {
-      props.onChatSubmit(message);
-      input.value = "";
-    }
-  }
+  const timerLabel =
+    waitingTime > 0 && roomMates.length >= 2
+      ? "Waiting time"
+      : "Game starts in ";
+  const timerValue =
+    waitingTime > 0 && roomMates.length >= 2 ? waitingTime : countdown;
 
   return El(
     "div",
@@ -35,26 +29,36 @@ export function LobbyView(props) {
         {},
         El("h1", {}, "BOMBERMAN"),
         El("p", {}, `Players: ${roomMates.length}/4`),
-        El("p", { class: `status-label ${hasTimer ? "" : "is-hidden"}` }, timerLabel),
-        El("div", { class: `status-box ${hasTimer ? "" : "is-hidden"}` }, hasTimer ? `${timerValue}s` : "0s"),
         El(
           "p",
-          { class: `waiting-message ${roomMates.length < 2 ? "" : "is-hidden"}` },
-          "Waiting for more players to join...",
+          { class: `status-label ${hasTimer ? "" : "is-hidden"}` },
+          timerLabel
+        ),
+        El(
+          "div",
+          { class: `status-box ${hasTimer ? "" : "is-hidden"}` },
+          hasTimer ? `${timerValue}s` : "0s"
+        ),
+        El(
+          "p",
+          {
+            class: `waiting-message ${roomMates.length < 2 ? "" : "is-hidden"}`,
+          },
+          "Waiting for more players to join..."
         ),
         El(
           "div",
           { class: "players-list" },
           El("h3", {}, "Connected Players"),
-          roomMates.map((player,i) =>
+          roomMates.map((player, i) =>
             El(
               "div",
               { key: player.nickname, class: "player-item" },
               El("span", {}),
-              ` ${player.nickname} (player${i+1})`,
-            ),
-          ),
-        ),
+              ` ${player.nickname} (player${i + 1})`
+            )
+          )
+        )
       ),
       El(
         "div",
@@ -64,17 +68,28 @@ export function LobbyView(props) {
           "div",
           { class: "chat-messages" },
           chatMessages.map((msg) =>
-              El(
-                "div",
-                { key: msg.id, class: "chat-message" },
-                El("strong", { class: "chat-author" }, `${msg.nickname}`),
-                El("span", { class: "chat-text" }, msg.message),
-              ),
-            ),
+            El(
+              "div",
+              { key: msg.id, class: "chat-message" },
+              El("strong", { class: "chat-author" }, `${msg.nickname}`),
+              El("span", { class: "chat-text" }, msg.message)
+            )
+          )
         ),
         El(
           "form",
-          { onsubmit: handleChatSubmit },
+          {
+            // Handle chat message submission
+            onsubmit: (e) => {
+              e.preventDefault();
+              const input = e.target.message;
+              const message = input.value.trim();
+              if (message) {
+                sendChatMessage(message);
+                input.value = "";
+              }
+            },
+          },
           El("input", {
             type: "text",
             name: "message",
@@ -83,10 +98,9 @@ export function LobbyView(props) {
             maxlength: "100",
             required: true,
           }),
-          El("button", { type: "submit" }, "Send"),
-        ),
-
-      ),
-    ),
+          El("button", { type: "submit" }, "Send")
+        )
+      )
+    )
   );
 }

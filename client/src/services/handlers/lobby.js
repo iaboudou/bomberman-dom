@@ -2,7 +2,8 @@ import { store, useState } from "../../../mini-framework/index.js";
 
 export function showMessage(data) {
     const [msgs, setMsgs] = useState("chatMessages");
-    setMsgs([...msgs, data]);
+    const next = [...msgs, data];
+    setMsgs(next.slice(-10));
 }
 
 export function updateTimer(data) {

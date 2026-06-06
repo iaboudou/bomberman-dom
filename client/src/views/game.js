@@ -1,4 +1,4 @@
-import { sendMove, sendBomb, ws } from "../services/ws.js";
+import { send, ws } from "../services/ws.js";
 import {
   El,
   Dom,
@@ -7,15 +7,10 @@ import {
   getEl,
   useState,
 } from "../../mini-framework/index.js";
-import {
-  getPlayerClass,
-  getPlayerPosition,
-  playerDirection,
-} from "./utils.js";
+import { getPlayerClass, getPlayerPosition, playerDirection } from "./utils.js";
 
 let uiDom, gridDom, playersDom, bombsDom, powerupsDom, explosionsDom;
 let domsInitialized = false;
-
 const subs = [];
 
 export function initDoms() {
@@ -110,13 +105,13 @@ function renderUI() {
               El(
                 "span",
                 { class: `ui-heart ${i < p.life ? "alive" : "lost"}` },
-                "♥",
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
+                "♥"
+              )
+            )
+          )
+        )
+      )
+    )
   );
 }
 
@@ -129,8 +124,8 @@ function renderGrid() {
     Map.grid
       .flat()
       .map((cell, i) =>
-        El("div", { key: i, class: `cell ${Map.classes[cell]}` }),
-      ),
+        El("div", { key: i, class: `cell ${Map.classes[cell]}` })
+      )
   );
 }
 
@@ -140,44 +135,46 @@ function renderPlayers() {
   return El(
     "fragment",
     {},
-    players.map((p) =>
-      p.isvisible && El("div", {
-        key: p.id,
-        class: getPlayerClass(p),
-        style: `
+    players.map(
+      (p) =>
+        p.isvisible &&
+        El("div", {
+          key: p.id,
+          class: getPlayerClass(p),
+          style: `
               --direction: ${playerDirection[p.direction]};
               --player: ${getPlayerPosition(p)};
               --px: ${p.x * 48}px;
               --py: ${p.y * 48}px;
               --flip: ${p.direction === "right" ? -1 : 1};
               --speed: ${p.speed}ms`,
-        onanimationend: () => {
-          const currentPlayers = store.get("players") || [];
-          const currentP = currentPlayers.find((saved) => saved.id === p.id);
-          if (!currentP) return;
+          onanimationend: () => {
+            const currentPlayers = store.get("players") || [];
+            const currentP = currentPlayers.find((saved) => saved.id === p.id);
+            if (!currentP) return;
 
-          if (currentP.isdead) {
-            store.set({
-              players: currentPlayers.map((saved) =>
-                saved.id === p.id ? { ...saved, isvisible: false } : saved,
-              ),
-            });
-          } else if (currentP.haslostlife) {
-            store.set({
-              players: currentPlayers.map((saved) =>
-                saved.id === p.id ? { ...saved, haslostlife: false } : saved,
-              ),
-            });
-          } else {
-            store.set({
-              players: currentPlayers.map((saved) =>
-                saved.id === p.id ? { ...saved, ismooving: false } : saved,
-              ),
-            });
-          }
-        },
-      }),
-    ),
+            if (currentP.isdead) {
+              store.set({
+                players: currentPlayers.map((saved) =>
+                  saved.id === p.id ? { ...saved, isvisible: false } : saved
+                ),
+              });
+            } else if (currentP.haslostlife) {
+              store.set({
+                players: currentPlayers.map((saved) =>
+                  saved.id === p.id ? { ...saved, haslostlife: false } : saved
+                ),
+              });
+            } else {
+              store.set({
+                players: currentPlayers.map((saved) =>
+                  saved.id === p.id ? { ...saved, ismooving: false } : saved
+                ),
+              });
+            }
+          },
+        })
+    )
   );
 }
 
@@ -192,8 +189,8 @@ function renderBombs() {
         key: b.id,
         class: "bomb",
         style: `--px: ${b.x * 48}px; --py: ${b.y * 48}px`,
-      }),
-    ),
+      })
+    )
   );
 }
 
@@ -208,8 +205,8 @@ function renderPowerups() {
         key: pu.id,
         class: `powerup ${pu.type}`,
         style: `--px: ${pu.x * 48}px; --py: ${pu.y * 48}px`,
-      }),
-    ),
+      })
+    )
   );
 }
 
@@ -224,38 +221,41 @@ function renderExplosions() {
         key: e.id,
         class: `explosion ${e.position}`,
         style: `--px: ${e.x * 48}px; --py: ${e.y * 48}px`,
-      }),
-    ),
+      })
+    )
   );
 }
 
 export function GameView() {
-  const handleMove = (e) => {
-    const [nickname] = useState("nickname");
-    const players = store.get("players") || [];
-    const currentPlayer = players.find((p) => p.nickname === nickname);
-    
-    if (!currentPlayer || currentPlayer.ismooving || currentPlayer.haslostlife) return;
-    e.preventDefault();
-
-    if (e.key === " ") {
-      sendBomb();
-      return;
-    }
-
-    const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-
-    if (validKeys.includes(e.key)) sendMove(e.key);
-  };
-
   return El(
     "div",
     {
       id: "app",
       tabindex: "0",
       autofocus: true,
-      onKeydown: (e) => handleMove(e),
+      onKeydown: (e) => {
+        const [nickname] = useState("nickname");
+        const players = store.get("players") || [];
+        const currentPlayer = players.find((p) => p.nickname === nickname);
+
+        if (
+          !currentPlayer ||
+          currentPlayer.ismooving ||
+          currentPlayer.haslostlife
+        )
+          return;
+        e.preventDefault();
+
+        if (e.key === " ") {
+          send("BOMB");
+          return;
+        }
+
+        const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+        if (validKeys.includes(e.key)) send("MOOVE", { direction: e.key });
+      },
     },
+    El("h1", { class: "game-title" }, "BOMBERMAN"),
     El("div", { id: "ui" }),
     El(
       "div",
@@ -264,7 +264,7 @@ export function GameView() {
       El("div", { id: "players" }),
       El("div", { id: "bombs" }),
       El("div", { id: "powerups" }),
-      El("div", { id: "explosions" }),
-    ),
+      El("div", { id: "explosions" })
+    )
   );
 }
