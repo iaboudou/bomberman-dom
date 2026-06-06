@@ -46,12 +46,12 @@ export function LobbyView(props) {
           "div",
           { class: "players-list" },
           El("h3", {}, "Connected Players"),
-          roomMates.map((player) =>
+          roomMates.map((player,i) =>
             El(
               "div",
               { key: player.nickname, class: "player-item" },
               El("span", {}),
-              ` ${player.nickname}`,
+              ` ${player.nickname} (player${i+1})`,
             ),
           ),
         ),

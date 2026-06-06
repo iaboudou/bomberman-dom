@@ -1,70 +1,38 @@
 import { El, useState, router, store } from "../../mini-framework/index.js";
-import { sendResetGame } from "../services/ws.js";
-import { playerColor } from "./utils.js";
+import { joinGame } from "../services/ws.js";
+import { getPlayerPosition, playerPosition } from "./utils.js";
 
 export function ResultView() {
-  const [winner] = useState("winner", null);
-  const [nickname] = useState("nickname");
+  const winner = store.get("winner")
+  const [nickname] = useState("nickname")
   const players = store.get("players") || [];
-
   const isWinner = winner && winner.nickname === nickname;
   const isDraw = !winner;
 
-  return El(
-    "div",
-    { class: "result-container" },
-
+  return El("div", { class: "result-container" },
     El(
       "p",
       { class: "result-title" },
-      isDraw ? "DRAW" : isWinner ? "VICTORY" : "DEFEAT"
+      isDraw ? "DRAW" : isWinner ? "VICTORY" : "DEFEAT",
     ),
-
-    !isDraw
-      ? El(
-          "div",
-          {
-            class: "winner-card",
-            style: `--player-color: ${playerColor(winner.nickname)}`,
-          },
-          El(
-            "div",
-            { class: "winner-avatar" },
-            winner.nickname[0].toUpperCase()
-          ),
-          El("span", { class: "winner-nickname" }, winner.nickname),
-          El("span", { class: "winner-label" }, "WINNER")
-        )
-      : El("p", {}, "Everyone died in the explosion."),
-    players.length > 1
-      ? El(
-          "button",
-          {
-            class: "result-btn",
-            style: `--player-color: ${
-              isWinner ? playerColor(nickname) : "aliceblue"
-            }`,
-            onclick: () => {
-              sendResetGame();
-            },
-          },
-          "PLAY AGAIN"
-        )
-      : El(
-          "button",
-          {
-            class: "result-btn",
-            style: `--player-color: ${
-              isWinner ? playerColor(nickname) : "aliceblue"
-            }`,
-            onclick: () => {
-              const [, setScreen] = useState("screen");
-              sendResetGame();
-              store.reset();
-              setScreen("welcome");
-            },
-          },
-          "BACK TO HOME PAGE"
-        )
-  );
+    El("div", { class: "result-players" },
+      players.map(p => El("div",
+        {
+          key: p.id,
+          class: `${p.id === winner.id ? "playerWinner" : "playerLoser"}`,
+          style: `--player: ${getPlayerPosition(p, p.id === winner.id)};`
+        })),
+    ),
+    El(
+      "button",
+      {
+        class: "welcome-btn",
+        onclick: () => {
+          store.reset()
+          joinGame(nickname);
+        },
+      },
+      "PLAY AGAIN"
+    )
+  )
 }

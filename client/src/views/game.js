@@ -1,3 +1,4 @@
+import { sendMove, sendBomb, ws } from "../services/ws.js";
 import {
   El,
   Dom,
@@ -6,12 +7,9 @@ import {
   getEl,
   useState,
 } from "../../mini-framework/index.js";
-import { GameMap } from "../entities/Map.js";
-import { sendMove, sendBomb, ws } from "../services/ws.js";
 import {
   getPlayerClass,
   getPlayerPosition,
-  playerColor,
   playerDirection,
 } from "./utils.js";
 
@@ -103,7 +101,6 @@ function renderUI() {
           {
             key: p.id,
             class: "ui-player",
-            style: `--player-color: ${playerColor(p.nickname)}`,
           },
           El("span", { class: "ui-avatar" }, p.nickname[0].toUpperCase()),
           El(
@@ -144,7 +141,7 @@ function renderPlayers() {
     "fragment",
     {},
     players.map((p) =>
-      El("div", {
+      p.isvisible && El("div", {
         key: p.id,
         class: getPlayerClass(p),
         style: `
@@ -160,7 +157,11 @@ function renderPlayers() {
           if (!currentP) return;
 
           if (currentP.isdead) {
-            store.set({players : currentPlayers.filter((saved) => saved.id !== p.id)});
+            store.set({
+              players: currentPlayers.map((saved) =>
+                saved.id === p.id ? { ...saved, isvisible: false } : saved,
+              ),
+            });
           } else if (currentP.haslostlife) {
             store.set({
               players: currentPlayers.map((saved) =>
@@ -229,13 +230,12 @@ function renderExplosions() {
 }
 
 export function GameView() {
-  const [nickname] = useState("nickname");
-  const players = store.get("players") || [];
-  const currentPlayer = players.find((p) => p.nickname === nickname);
-
   const handleMove = (e) => {
-    if (!currentPlayer || currentPlayer.ismooving || currentPlayer.haslostlife)
-      return;
+    const [nickname] = useState("nickname");
+    const players = store.get("players") || [];
+    const currentPlayer = players.find((p) => p.nickname === nickname);
+    
+    if (!currentPlayer || currentPlayer.ismooving || currentPlayer.haslostlife) return;
     e.preventDefault();
 
     if (e.key === " ") {

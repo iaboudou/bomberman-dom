@@ -1,19 +1,20 @@
 import { useState, store } from "../../mini-framework/index.js";
-import { GameMap } from "../entities/Map.js";
 import { initDoms, resetDoms } from "../views/game.js";
+import { addPlayer, initLobby, removePlayer, showError } from "./handlers/auth.js";
+import { addBomb, explodeBomb, removeExplosions } from "./handlers/bombs.js";
+import { endGame, startGame } from "./handlers/gameLife.js";
+import { showMessage, updateTimer } from "./handlers/lobby.js";
+import { moovePlayer } from "./handlers/mooves.js";
 
-// ─── State
 export let ws = null;
 
-// ─1 ── Connection
 export function startWebsocketService() {
   ws = new WebSocket(`ws://localhost:8080`);
   ws.onopen = () => console.log("connected to the ws");
-  ws.onerror = (err) => console.log(err);
+  ws.onerror = (err) => console.error(err);
   ws.onmessage = onMessage;
 }
 
-// ─2 ── Message processing
 function onMessage(event) {
   let message;
   try {
@@ -25,194 +26,30 @@ function onMessage(event) {
   if (handler) handler(message.data);
 }
 
-// ─3 ── Message handlers
 const handlers = {
-  JOIN_SUCCESS(data) {
-    useState("nickname", data.nickname);
-    useState("roomMates", data.roomMates);
-    useState("chatMessages", []);
-    useState("lobbyTimer", { type: null, value: 0 });
-    const [, setScreen] = useState("screen");
-    setScreen("lobby");
-  },
-
-  NICKNAME_ERROR(data) {
-    const [, setError] = useState("error", null);
-    setError(data.message);
-  },
-
-  CHAT(data) {
-    const [msgs, setMsgs] = useState("chatMessages");
-    setMsgs([...msgs, data]);
-  },
-
-  NEW_PLAYER(data) {
-    console.log(data.nickname);
-    const [players, setPlayers] = useState("roomMates");
-    setPlayers([...players, { nickname: data.nickname }]);
-  },
-
-  PLAYER_LEFT(data) {
-    const [players, setPlayers] = useState("players");
-    setPlayers(players.filter((p) => p.nickname !== data.left));
-  },
-
-  PLAYER_MOOVED(data) {
-    const players = store.get("players") || [];
-
-    store.set({
-      players: players.map((p) =>
-        p.id === data.id
-          ? {
-              ...p,
-              x: data.x,
-              y: data.y,
-              direction: data.direction.toLowerCase().slice(5),
-              ismooving: true,
-              speed: data.duration,
-            }
-          : p,
-      ),
-    });
-
-    if (data.powerups) {
-      store.set({ powerups: data.powerups });
-    }
-  },
-
-  MAP_INIT(data) {
-    console.log(data.players)
-    store.set({ map: new GameMap(data.grid, data.tiles) });
-    store.set({
-      players: data.players.map((p) => {
-        return {
-          id: p.id,
-          nickname: p.nickname,
-          x: p.x,
-          y: p.y,
-          life: p.remaininglife,
-          maxlife: p.maxlife,
-          direction: p.direction,
-          number: p.number,
-          mooving: false,
-          isdead: false,
-          haslostlife: false,
-          speed: 0,
-        };
-      }),
-    });
-    store.set({ bombs: [] });
-    store.set({ powerups: [] });
-    store.set({ explosions: [] });
-    store.set({ spectator: false });
-    store.set({ winner: null });
-
-    const [, setScreen] = useState("screen");
-    setScreen("game");
-
-    requestAnimationFrame(() => initDoms());
-  },
-
-  WAINTING_OR_COUNTDOWN_TIMER(data) {
-    const [lobbyTimer, setLobbyTimer] = useState("lobbyTimer", {
-      type: null,
-      value: 0,
-    });
-    if (lobbyTimer.type === data.type && lobbyTimer.value === data.waitingTime)
-      return;
-    setLobbyTimer({ type: data.type, value: data.waitingTime });
-
-    if (data?.players) {
-      store.set({ players: data.players });
-    }
-  },
-
-  BOMB_PLACED(data) {
-    const bombs = store.get("bombs") || [];
-    store.set({ bombs: [...bombs, data.bomb] });
-  },
-
-  BOMB_EXPLODED(data) {
-    const bombs = store.get("bombs") || [];
-
-    store.set({ bombs: bombs.filter((b) => b.id !== data.bombId) });
-
-    if (data.removedBlocks.length > 0) {
-      const currentMap = store.get("map");
-      data.removedBlocks.forEach(({ x, y }) => {
-        currentMap.grid[y][x] = currentMap.tiles.empty;
-      });
-      store.set({ map: { ...currentMap } });
-    }
-
-    if (data.spawnedPowerups.length > 0) {
-      const powerups = store.get("powerups") || [];
-      store.set({ powerups: [...powerups, ...data.spawnedPowerups] });
-    }
-
-    if (data.explosionCells.length > 0) {
-      const explosions = store.get("explosions") || [];
-      store.set({ explosions: [...explosions, ...data.explosionCells] });
-    }
-
-    const players = store.get("players") || [];
-
-    const updatedPlayers = players.map((p) => {
-      if (data.deadPlayers.includes(p.id))
-        return { ...p, life: 0, isdead: true };
-      const hit = data.affectedPlayers.find((ap) => ap.id === p.id);
-      if (hit) return { ...p, life: hit.remaininglife, haslostlife: true };
-      return p;
-    });
-
-    store.set({ players: updatedPlayers });
-    store.set({ playersLife: updatedPlayers });
-  },
-
-  REMOVE_EXPLOSIONS(data) {
-    const explosions = store.get("explosions") || [];
-    const idsToRemove = new Set(data.explosionCells.map((e) => e.id));
-    store.set({
-      explosions: explosions.filter((exp) => !idsToRemove.has(exp.id)),
-    });
-  },
-
-  YOU_DIED() {
-    const players = store.get("players") || [];
-    const [nickname] = useState("nickname");
-    store.set({
-      players: players.map((p) =>
-        p.nickname === nickname ? { ...p, isdead: true, ismooving: false } : p,
-      ),
-    });
-  },
-
-  GAME_OVER(data) {
-    store.set({ winner: data.winner });
-    resetDoms();
-    const [, setScreen] = useState("screen");
-    setScreen("result");
-  },
-
-  RESET_GAME() {
-    const [, setScreen] = useState("screen");
-    setScreen("game");
-  },
+  "JOIN_SUCCESS": initLobby,
+  "NICKNAME_ERROR": showError,
+  "NEW_PLAYER": addPlayer,
+  "PLAYER_LEFT": removePlayer,
+  "WAINTING_OR_COUNTDOWN_TIMER": updateTimer,
+  "CHAT": showMessage,
+  "MAP_INIT": startGame,
+  "PLAYER_MOOVED": moovePlayer,
+  "BOMB_PLACED" : addBomb,
+  "BOMB_EXPLODED" : explodeBomb,
+  "REMOVE_EXPLOSIONS" : removeExplosions,
+  "GAME_OVER": endGame,
 };
 
-// ─4 ── Actions
 function send(type, data = {}) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type, data }));
   }
 }
-
 export const joinGame = (nickname) => send("JOIN", { nickname });
 export const getMap = () => send("MAP_INIT");
 export const sendMove = (direction) => send("MOOVE", { direction });
 export const sendBomb = () => send("BOMB");
-export const sendResetGame = () => send("RESET_GAME");
-
 export function sendChatMessage(message) {
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ type: "CHAT", data: { message } }));

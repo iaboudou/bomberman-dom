@@ -1,6 +1,4 @@
-const colorCache = new Map();
-
-const playerPosition = {
+export const playerPosition = {
   1: 568,
   2: 668,
   3: 768,
@@ -14,17 +12,6 @@ export const playerDirection = {
   right: "-156px",
 };
 
-export const playerColor = (nickname) => {
-    if (colorCache.has(nickname)) return colorCache.get(nickname);
-    let hash = 0;
-    for (let i = 0; i < nickname.length; i++) {
-        hash = nickname.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const color = `hsl(${Math.abs(hash) % 360}, 70%, 60%)`;
-    colorCache.set(nickname, color);
-    return color;
-};
-
 export const getPlayerClass = (player) => {
     const base = `player player${player.number}`;
 
@@ -35,7 +22,7 @@ export const getPlayerClass = (player) => {
     return base;
 };
 
-export const getPlayerPosition = (player) => {
-    if (player.isdead) return `-${playerPosition[player.number] + 50}px`;
+export const getPlayerPosition = (player, iswinner = true) => {
+    if (player.isdead || !iswinner) return `-${playerPosition[player.number] + 50}px`;
     return `-${playerPosition[player.number]}px`;
 };
