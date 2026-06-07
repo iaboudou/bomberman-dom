@@ -29,7 +29,6 @@ export function WelcomeView() {
             e.preventDefault();
             const nickname = e.target.nickname.value.trim();
             if (nickname.length > 0 && nickname.length <= 10) {
-              useState("I_am", nickname);
               send("JOIN", { nickname })
             } else {
               setError("Nickname must be between 1 and 10 characters.");

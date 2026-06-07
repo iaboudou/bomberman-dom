@@ -30,7 +30,6 @@ export function startGame(data) {
     store.set({ bombs: [] });
     store.set({ powerups: [] });
     store.set({ explosions: [] });
-    store.set({ spectator: false });
     store.set({ winner: null });
 
     const [, setScreen] = useState("screen");

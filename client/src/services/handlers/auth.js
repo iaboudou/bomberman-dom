@@ -22,7 +22,7 @@ export function removePlayer(data) {
 
   const updatedPlayers = players.map((p) =>
     p.nickname === data.left
-      ? { ...p, isdead: true, disconnected: true, life: 0, haslostlife: true }
+      ? { ...p, isdead: true, life: 0, haslostlife: true }
       : p
   );
 

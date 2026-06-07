@@ -14,13 +14,18 @@ A multiplayer Bomberman game built using a custom JavaScript mini-framework. Thi
 
 1. **Setup**: Install the necessary backend dependencies.
    ```bash
-   make install
+   ./run.sh install
    ```
 
 2. **Run**: Start both the server and the client with a single command.
    ```bash
-   make run
+   ./run.sh run
    ```
+
+To do both (install and run) in one step:
+```bash
+./run.sh all
+```
 
 ## Navigation Flow
 1. **Welcome**: Enter your nickname.

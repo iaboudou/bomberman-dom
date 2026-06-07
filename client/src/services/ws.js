@@ -1,5 +1,3 @@
-import { useState, store } from "../../mini-framework/index.js";
-import { initDoms, resetDoms } from "../views/game.js";
 import { addPlayer, initLobby, removePlayer, showError } from "./handlers/auth.js";
 import { addBomb, explodeBomb, removeExplosions } from "./handlers/bombs.js";
 import { endGame, startGame } from "./handlers/gameLife.js";

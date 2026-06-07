@@ -1,6 +1,6 @@
-import { El, useState, router, store } from "../../mini-framework/index.js";
+import { El, useState, store } from "../../mini-framework/index.js";
 import { send } from "../services/ws.js";
-import { getPlayerPosition, playerPosition } from "./utils.js";
+import { getPlayerPosition } from "./utils.js";
 
 export function ResultView() {
   const winner = store.get("winner");
@@ -27,8 +27,8 @@ export function ResultView() {
           "div",
           {
             key: p.id,
-            class: `${p.id === winner.id ? "playerWinner" : "playerLoser"}`,
-            style: `--player: ${getPlayerPosition(p, p.id === winner.id)};`,
+            class: `${winner && p.id === winner.id ? "playerWinner" : "playerLoser"}`,
+            style: `--player: ${getPlayerPosition(p, winner && p.id === winner.id)};`,
           },
           El("div", { class: "result-nickname" }, p.nickname)
         )

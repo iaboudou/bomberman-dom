@@ -1,4 +1,4 @@
-import { send, ws } from "../services/ws.js";
+import { send } from "../services/ws.js";
 import {
   El,
   Dom,
