@@ -97,7 +97,18 @@ function renderUI() {
             key: p.id,
             class: "ui-player",
           },
-          El("span", { class: "ui-avatar" }, p.nickname[0].toUpperCase()),
+          El(
+            "span",
+            {
+              class: "ui-avatar ui-avatar-sprite",
+              style: `--player: ${getPlayerPosition(p)};`
+            },
+            El(
+              "span",
+              { class: "ui-avatar-badge" },
+              p.nickname[0].toUpperCase()
+            )
+          ),
           El(
             "div",
             { class: "ui-lives" },
@@ -114,7 +125,6 @@ function renderUI() {
     )
   );
 }
-
 function renderGrid() {
   const Map = store.get("map");
 

@@ -13,7 +13,7 @@ server() {
 }
 
 client() {
-	echo "Client running at ws://10.1.9.8:3000"
+	echo "Client running at ws://localhost:3000"
 	npx live-server $ROOT/client --port=3000 --quiet
 }
 

@@ -23,11 +23,15 @@ export function ResultView() {
       "div",
       { class: "result-players" },
       players.map((p) =>
-        El("div", {
-          key: p.id,
-          class: `${p.id === winner.id ? "playerWinner" : "playerLoser"}`,
-          style: `--player: ${getPlayerPosition(p, p.id === winner.id)};`,
-        })
+        El(
+          "div",
+          {
+            key: p.id,
+            class: `${p.id === winner.id ? "playerWinner" : "playerLoser"}`,
+            style: `--player: ${getPlayerPosition(p, p.id === winner.id)};`,
+          },
+          El("div", { class: "result-nickname" }, p.nickname)
+        )
       )
     ),
     El(

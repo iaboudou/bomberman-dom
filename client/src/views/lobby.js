@@ -54,8 +54,9 @@ export function LobbyView() {
             El(
               "div",
               { key: player.nickname, class: "player-item" },
-              El("span", {}),
-              ` ${player.nickname} (player${i + 1})`
+              El("span", { class: "player-status" }),
+              El("span", { class: "player-name" }, player.nickname),
+              El("span", { class: "player-number" }, ` (player ${i + 1})`)
             )
           )
         )

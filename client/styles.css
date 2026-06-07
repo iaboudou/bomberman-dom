@@ -48,13 +48,17 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateZ(0) translateY(0);
   }
+
   50% {
     transform: translateZ(0) translateY(-8px);
   }
 }
+
 /*  */
 
 #ui {
@@ -90,6 +94,37 @@ body {
   font-weight: bold;
   color: white;
 }
+
+/* ------------ */
+.ui-avatar-sprite {
+  background-image: url('./images/bomberman.png');
+  background-size: calc(608px * 32 / 48) calc(1374px * 32 / 48);
+  background-position: 0px calc(var(--player) * 32 / 48);
+  image-rendering: pixelated;
+  background-repeat: no-repeat;
+  background-color: #2b2b36;
+  position: relative;
+  overflow: visible;
+}
+
+.ui-avatar-badge {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  background: #1a1a2e;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  color: white;
+  border: 1px solid #78a048;
+  font-weight: bold;
+}
+
+/* ------------ */
 
 .ui-lives {
   display: flex;
@@ -566,16 +601,23 @@ body {
   color: aliceblue;
 }
 
+
+.result-nickname {
+  margin-top: 60px;
+  text-align: center;
+  font-size: 10px;
+  color: #fff;
+  font-weight: 500;
+}
+
 /* welcome page */
 
 #app:has(.welcome-screen) {
   border: none !important;
-  background: radial-gradient(
-    circle at 50% 0%,
-    #1a1a24 0%,
-    #050505 80%,
-    #000000 100%
-  ) !important;
+  background: radial-gradient(circle at 50% 0%,
+      #1a1a24 0%,
+      #050505 80%,
+      #000000 100%) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -607,11 +649,9 @@ body {
   box-sizing: border-box;
   position: relative;
 
-  background: linear-gradient(
-    145deg,
-    rgba(28, 28, 33, 0.96) 0%,
-    rgba(8, 8, 10, 0.98) 100%
-  );
+  background: linear-gradient(145deg,
+      rgba(28, 28, 33, 0.96) 0%,
+      rgba(8, 8, 10, 0.98) 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
@@ -640,15 +680,19 @@ body {
   animation: float 3s ease-in-out infinite;
   will-change: transform;
 }
+
 @keyframes float {
+
   0%,
   100% {
     transform: translateZ(0) translateY(0);
   }
+
   50% {
     transform: translateZ(0) translateY(-8px);
   }
 }
+
 /*  */
 
 .welcome-subtitle {
@@ -661,12 +705,10 @@ body {
 .welcome-divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
   margin: 8px 0;
 }
 
@@ -732,12 +774,10 @@ body {
 
 #app:has(.lobby-screen) {
   border: none !important;
-  background: radial-gradient(
-    circle at 50% 0%,
-    #1a1a24 0%,
-    #050505 80%,
-    #000000 100%
-  ) !important;
+  background: radial-gradient(circle at 50% 0%,
+      #1a1a24 0%,
+      #050505 80%,
+      #000000 100%) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -758,11 +798,9 @@ body {
   padding: 40px;
   gap: 50px;
 
-  background: linear-gradient(
-    145deg,
-    rgba(28, 28, 33, 0.96) 0%,
-    rgba(8, 8, 10, 0.98) 100%
-  );
+  background: linear-gradient(145deg,
+      rgba(28, 28, 33, 0.96) 0%,
+      rgba(8, 8, 10, 0.98) 100%);
 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -778,11 +816,9 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    circle at 50% 0%,
-    rgba(120, 160, 72, 0.04),
-    transparent 55%
-  );
+  background: radial-gradient(circle at 50% 0%,
+      rgba(120, 160, 72, 0.04),
+      transparent 55%);
   pointer-events: none;
   z-index: 0;
 }
@@ -798,31 +834,35 @@ body {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateZ(0) translateY(0);
   }
+
   50% {
     transform: translateZ(0) translateY(-8px);
   }
 }
+
 /*  */
 
 .lobby-container {
   display: contents;
 }
 
-.lobby-container > div:first-child {
+.lobby-container>div:first-child {
   display: flex;
   flex-direction: column;
   gap: 24px;
   z-index: 1;
 }
 
-.lobby-container > div:nth-child(2) {
+.lobby-container>div:nth-child(2) {
   display: none;
 }
 
-.lobby-container > div:last-child {
+.lobby-container>div:last-child {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -831,20 +871,18 @@ body {
   overflow: hidden;
 }
 
-.lobby-container > div:last-child::before {
+.lobby-container>div:last-child::before {
   content: "";
   position: absolute;
   left: -25px;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0.1) 20%,
-    rgba(255, 255, 255, 0.1) 80%,
-    rgba(255, 255, 255, 0)
-  );
+  background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.1) 20%,
+      rgba(255, 255, 255, 0.1) 80%,
+      rgba(255, 255, 255, 0));
 }
 
 .lobby-container h1 {
@@ -859,7 +897,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.lobby-container > div:first-child > p:first-of-type {
+.lobby-container>div:first-child>p:first-of-type {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2px;
@@ -920,23 +958,36 @@ body {
 
 .player-item {
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 500;
+  gap: 8px;
+  font-size: 15px;
   color: #e2e8f0;
 }
 
-.player-item span {
-  width: 8px;
-  height: 8px;
+.player-status {
+  width: 10px;
+  height: 10px;
   background: #78a048;
   border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 4px;
 }
+
+.player-name {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.player-number {
+  font-size: 11px;
+  color: #88889b;
+  font-weight: 400;
+}
+
 
 .chat-messages {
   flex: 1;
@@ -968,7 +1019,7 @@ body {
   flex-direction: column;
   gap: 2px;
   padding: 12px 14px;
-   overflow-wrap: break-word;
+  overflow-wrap: break-word;
   word-break: break-word;
   /* background: rgba(0, 0, 0, 0.3); */
   border-radius: 10px;
@@ -1031,7 +1082,7 @@ body {
   transition: all 0.2s;
 }
 
-.lobby-container > div:last-child > button {
+.lobby-container>div:last-child>button {
   background: linear-gradient(135deg, #78a048 0%, #5c7a38 100%);
   border: none;
   border-radius: 12px;
