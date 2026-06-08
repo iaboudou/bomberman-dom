@@ -40,15 +40,11 @@ body {
   font-size: 2rem;
   color: white;
   margin: 0 0 16px 0;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  will-change: transform;
   will-change: transform, opacity;
   animation: float 3s ease-in-out infinite;
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateZ(0) translateY(0);
@@ -70,7 +66,6 @@ body {
   width: 816px;
   background: #1a1a2e;
 }
-
 
 .ui-players {
   display: flex;
@@ -97,7 +92,7 @@ body {
 
 /* ------------ */
 .ui-avatar-sprite {
-  background-image: url('./images/bomberman.png');
+  background-image: url("./images/bomberman.png");
   background-size: calc(608px * 32 / 48) calc(1374px * 32 / 48);
   background-position: 0px calc(var(--player) * 32 / 48);
   image-rendering: pixelated;
@@ -601,7 +596,6 @@ body {
   color: aliceblue;
 }
 
-
 .result-nickname {
   margin-top: 60px;
   text-align: center;
@@ -614,10 +608,12 @@ body {
 
 #app:has(.welcome-screen) {
   border: none !important;
-  background: radial-gradient(circle at 50% 0%,
-      #1a1a24 0%,
-      #050505 80%,
-      #000000 100%) !important;
+  background: radial-gradient(
+    circle at 50% 0%,
+    #1a1a24 0%,
+    #050505 80%,
+    #000000 100%
+  ) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -649,9 +645,11 @@ body {
   box-sizing: border-box;
   position: relative;
 
-  background: linear-gradient(145deg,
-      rgba(28, 28, 33, 0.96) 0%,
-      rgba(8, 8, 10, 0.98) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(28, 28, 33, 0.96) 0%,
+    rgba(8, 8, 10, 0.98) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
@@ -682,7 +680,6 @@ body {
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateZ(0) translateY(0);
@@ -705,10 +702,12 @@ body {
 .welcome-divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   margin: 8px 0;
 }
 
@@ -774,10 +773,12 @@ body {
 
 #app:has(.lobby-screen) {
   border: none !important;
-  background: radial-gradient(circle at 50% 0%,
-      #1a1a24 0%,
-      #050505 80%,
-      #000000 100%) !important;
+  background: radial-gradient(
+    circle at 50% 0%,
+    #1a1a24 0%,
+    #050505 80%,
+    #000000 100%
+  ) !important;
   padding: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -798,9 +799,11 @@ body {
   padding: 40px;
   gap: 50px;
 
-  background: linear-gradient(145deg,
-      rgba(28, 28, 33, 0.96) 0%,
-      rgba(8, 8, 10, 0.98) 100%);
+  background: linear-gradient(
+    145deg,
+    rgba(28, 28, 33, 0.96) 0%,
+    rgba(8, 8, 10, 0.98) 100%
+  );
 
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.15);
@@ -816,9 +819,11 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 0%,
-      rgba(120, 160, 72, 0.04),
-      transparent 55%);
+  background: radial-gradient(
+    circle at 50% 0%,
+    rgba(120, 160, 72, 0.04),
+    transparent 55%
+  );
   pointer-events: none;
   z-index: 0;
 }
@@ -834,7 +839,6 @@ body {
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateZ(0) translateY(0);
@@ -851,18 +855,18 @@ body {
   display: contents;
 }
 
-.lobby-container>div:first-child {
+.lobby-container > div:first-child {
   display: flex;
   flex-direction: column;
   gap: 24px;
   z-index: 1;
 }
 
-.lobby-container>div:nth-child(2) {
+.lobby-container > div:nth-child(2) {
   display: none;
 }
 
-.lobby-container>div:last-child {
+.lobby-container > div:last-child {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -871,18 +875,20 @@ body {
   overflow: hidden;
 }
 
-.lobby-container>div:last-child::before {
+.lobby-container > div:last-child::before {
   content: "";
   position: absolute;
   left: -25px;
   top: 0;
   bottom: 0;
   width: 1px;
-  background: linear-gradient(to bottom,
-      rgba(255, 255, 255, 0),
-      rgba(255, 255, 255, 0.1) 20%,
-      rgba(255, 255, 255, 0.1) 80%,
-      rgba(255, 255, 255, 0));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.1) 20%,
+    rgba(255, 255, 255, 0.1) 80%,
+    rgba(255, 255, 255, 0)
+  );
 }
 
 .lobby-container h1 {
@@ -897,7 +903,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.lobby-container>div:first-child>p:first-of-type {
+.lobby-container > div:first-child > p:first-of-type {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2px;
@@ -987,7 +993,6 @@ body {
   color: #88889b;
   font-weight: 400;
 }
-
 
 .chat-messages {
   flex: 1;
@@ -1082,7 +1087,7 @@ body {
   transition: all 0.2s;
 }
 
-.lobby-container>div:last-child>button {
+.lobby-container > div:last-child > button {
   background: linear-gradient(135deg, #78a048 0%, #5c7a38 100%);
   border: none;
   border-radius: 12px;

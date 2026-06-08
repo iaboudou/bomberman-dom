@@ -207,7 +207,7 @@ export class Room {
           this.removeWaitingTimer();
           this.sendTimer("waitingTime");
         }
-        break; // ← manquait
+        break;
       }
       case "COUNTDOWN": {
         if (this.players.length < 2) {
@@ -219,12 +219,12 @@ export class Room {
           this.status = "WAITING";
           this.sendTimer("waitingTime");
         }
-        break; // ← manquait
+        break;
       }
       case "INGAME": {
-        console.log('all lefts')
-        if (this.players.length < 2) {
-          this.endGame(this.players[0] || null);
+        const alivePlayers = this.players.filter((p) => !p.isDead());
+        if (alivePlayers.length < 2) {
+          this.endGame(alivePlayers[0] || null);
         }
         break;
       }

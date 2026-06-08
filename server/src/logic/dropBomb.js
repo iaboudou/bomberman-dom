@@ -12,7 +12,7 @@ export function dropBomb(room, player) {
     if (bombOnCell) return;
 
     const bomb = new Bomb(player.x, player.y, player.range);
-
+    room.bombs.push(bomb);
     player.activeBombs++;
 
     const tid = setTimeout(() => {

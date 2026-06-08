@@ -1,5 +1,6 @@
 import { El, useState } from "../../mini-framework/index.js";
 import { sendChatMessage } from "../services/ws.js";
+let lastChatSent = 0;
 
 // this is the lobby page where players wait for the game to start
 export function LobbyView() {
@@ -83,11 +84,16 @@ export function LobbyView() {
             // Handle chat message submission
             onsubmit: (e) => {
               e.preventDefault();
+
+              const now = Date.now();
+              if (now - lastChatSent < 100) return;
+
               const input = e.target.message;
               const message = input.value.trim();
               if (message) {
                 sendChatMessage(message);
                 input.value = "";
+                lastChatSent = now;
               }
             },
           },

@@ -101,7 +101,7 @@ function renderUI() {
             "span",
             {
               class: "ui-avatar ui-avatar-sprite",
-              style: `--player: ${getPlayerPosition(p)};`
+              style: `--player: ${getPlayerPosition(p)};`,
             },
             El(
               "span",
@@ -236,6 +236,9 @@ function renderExplosions() {
   );
 }
 
+let lastMoveSent = 0;
+let lastBombSent = 0;
+
 export function GameView() {
   return El(
     "div",
@@ -256,13 +259,26 @@ export function GameView() {
           return;
         e.preventDefault();
 
+        // space
         if (e.key === " ") {
-          send("BOMB");
+          const now = Date.now();
+          if (!currentPlayer || currentPlayer.isdead) return;
+          if (now - lastBombSent >= 150) {
+            send("BOMB");
+            lastBombSent = now;
+          }
           return;
         }
 
+        // arrow keys
         const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-        if (validKeys.includes(e.key)) send("MOOVE", { direction: e.key });
+        if (validKeys.includes(e.key)) {
+          const now = Date.now();
+          if (now - lastMoveSent >= 50) {
+            send("MOOVE", { direction: e.key });
+            lastMoveSent = now;
+          }
+        }
       },
     },
     El("h1", { class: "game-title" }, "BOMBERMAN"),
