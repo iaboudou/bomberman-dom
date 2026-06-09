@@ -1,6 +1,12 @@
 import { GameMap } from "../entities/Map.js";
 import { Player } from "../entities/Player.js";
-import { spawnPoints } from "../utils/Const.js";
+import {
+  DEFAULT_COUNTDOWN_TIME,
+  DEFAULT_WAITING_TIME,
+  DYING_ANIMATION_DURATION,
+  LOSING_LIFE_ANIMATION_DURATION,
+  spawnPoints,
+} from "../utils/Const.js";
 import { sendTofront } from "../utils/Utils.js";
 
 export class Room {
@@ -59,7 +65,7 @@ export class Room {
 
   hasNickname(nickname) {
     return [...this.players, ...this.clients].some(
-      (p) => p.nickname.toLowerCase() === nickname.toLowerCase()
+      (p) => p.nickname.toLowerCase() === nickname.toLowerCase(),
     );
   }
 
@@ -76,7 +82,7 @@ export class Room {
       sendTofront(c.socket, "WAINTING_OR_COUNTDOWN_TIMER", {
         waitingTime: this[type],
         type,
-      })
+      }),
     );
   }
 
@@ -85,7 +91,7 @@ export class Room {
   startWaitingTimer() {
     if (this.setInterval_waitingTimer) return;
 
-    this.waitingTime = 20;
+    this.waitingTime = DEFAULT_WAITING_TIME;
     this.status = "WAITING";
 
     this.sendTimer("waitingTime");
@@ -123,7 +129,7 @@ export class Room {
 
     this.initGameState();
     this.status = "COUNTDOWN";
-    this.countdown = 10;
+    this.countdown = DEFAULT_COUNTDOWN_TIME;
 
     this.sendTimer("countdown");
 
@@ -157,6 +163,8 @@ export class Room {
         grid: this.map.grid,
         tiles: this.map.TILES,
         classes: this.map.classes,
+        losingLifeAnimationDuration: LOSING_LIFE_ANIMATION_DURATION,
+        dyingAnimationDuration: DYING_ANIMATION_DURATION,
         players: this.players.map((player) => ({
           id: player.id,
           number: player.number,
@@ -199,7 +207,7 @@ export class Room {
 
     const receivers = this.clients.length > 0 ? this.clients : this.players;
     receivers.forEach((r) =>
-      sendTofront(r.socket, "PLAYER_LEFT", { left: nickname })
+      sendTofront(r.socket, "PLAYER_LEFT", { left: nickname }),
     );
     switch (this.status) {
       case "WAITING": {
@@ -213,7 +221,7 @@ export class Room {
         if (this.players.length < 2) {
           this.removeCountDown();
           this.players.forEach((p) =>
-            this.clients.push({ nickname: p.nickname, socket: p.socket })
+            this.clients.push({ nickname: p.nickname, socket: p.socket }),
           );
           this.players = [];
           this.status = "WAITING";

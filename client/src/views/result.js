@@ -12,12 +12,10 @@ export function ResultView() {
   return El(
     "div",
     { class: "result-container" },
-    El("h1", { class: "game-title" }, "BOMBERMAN"),
-
     El(
-      "p",
-      { class: "result-title" },
-      isDraw ? "DRAW" : isWinner ? "VICTORY" : "DEFEAT"
+      "h1",
+      { class: "game-title" },
+      isDraw ? "DRAW" : isWinner ? "VICTORY" : "DEFEAT",
     ),
     El(
       "div",
@@ -30,9 +28,9 @@ export function ResultView() {
             class: `${winner && p.id === winner.id ? "playerWinner" : "playerLoser"}`,
             style: `--player: ${getPlayerPosition(p, winner && p.id === winner.id)};`,
           },
-          El("div", { class: "result-nickname" }, p.nickname)
-        )
-      )
+          El("div", { class: "result-nickname" }, p.nickname),
+        ),
+      ),
     ),
     El(
       "button",
@@ -43,7 +41,7 @@ export function ResultView() {
           send("JOIN", { nickname });
         },
       },
-      "PLAY AGAIN"
-    )
+      "PLAY AGAIN",
+    ),
   );
 }

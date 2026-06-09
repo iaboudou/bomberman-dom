@@ -6,9 +6,11 @@ import {
   store,
   getEl,
   useState,
+  bodyDOM,
 } from "../../mini-framework/index.js";
 import { getPlayerClass, getPlayerPosition, playerDirection } from "./utils.js";
 
+let animationID;
 let uiDom, gridDom, playersDom, bombsDom, powerupsDom, explosionsDom;
 let domsInitialized = false;
 const subs = [];
@@ -67,13 +69,7 @@ export function initDoms() {
 }
 
 export function resetDoms() {
-  if (uiDom) uiDom.mount(null);
-  if (gridDom) gridDom.mount(null);
-  if (playersDom) playersDom.mount(null);
-  if (bombsDom) bombsDom.mount(null);
-  if (powerupsDom) powerupsDom.mount(null);
-  if (explosionsDom) explosionsDom.mount(null);
-
+  bodyDOM.mount(null);
   subs.forEach(([key, cb]) => store.unsubscribe(key, cb));
   subs.length = 0;
 
@@ -106,8 +102,8 @@ function renderUI() {
             El(
               "span",
               { class: "ui-avatar-badge" },
-              p.nickname[0].toUpperCase()
-            )
+              p.nickname[0].toUpperCase(),
+            ),
           ),
           El(
             "div",
@@ -116,13 +112,13 @@ function renderUI() {
               El(
                 "span",
                 { class: `ui-heart ${i < p.life ? "alive" : "lost"}` },
-                "♥"
-              )
-            )
-          )
-        )
-      )
-    )
+                "♥",
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
 }
 function renderGrid() {
@@ -134,13 +130,15 @@ function renderGrid() {
     Map.grid
       .flat()
       .map((cell, i) =>
-        El("div", { key: i, class: `cell ${Map.classes[cell]}` })
-      )
+        El("div", { key: i, class: `cell ${Map.classes[cell]}` }),
+      ),
   );
 }
 
 function renderPlayers() {
   const players = store.get("players") || [];
+  const dyingAnim = store.get("dyingAnimation");
+  const lostLifeAnim = store.get("lostLifeAnimation");
 
   return El(
     "fragment",
@@ -157,7 +155,9 @@ function renderPlayers() {
               --px: ${p.x * 48}px;
               --py: ${p.y * 48}px;
               --flip: ${p.direction === "right" ? -1 : 1};
-              --speed: ${p.speed}ms`,
+              --speed: ${p.speed}ms;
+              --diying: ${dyingAnim}s;
+              --lostlife: ${lostLifeAnim}s`,
           onanimationend: () => {
             const currentPlayers = store.get("players") || [];
             const currentP = currentPlayers.find((saved) => saved.id === p.id);
@@ -166,25 +166,25 @@ function renderPlayers() {
             if (currentP.isdead) {
               store.set({
                 players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, isvisible: false } : saved
+                  saved.id === p.id ? { ...saved, isvisible: false } : saved,
                 ),
               });
             } else if (currentP.haslostlife) {
               store.set({
                 players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, haslostlife: false } : saved
+                  saved.id === p.id ? { ...saved, haslostlife: false } : saved,
                 ),
               });
             } else {
               store.set({
                 players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, ismooving: false } : saved
+                  saved.id === p.id ? { ...saved, ismooving: false } : saved,
                 ),
               });
             }
           },
-        })
-    )
+        }),
+    ),
   );
 }
 
@@ -199,8 +199,8 @@ function renderBombs() {
         key: b.id,
         class: "bomb",
         style: `--px: ${b.x * 48}px; --py: ${b.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -215,8 +215,8 @@ function renderPowerups() {
         key: pu.id,
         class: `powerup ${pu.type}`,
         style: `--px: ${pu.x * 48}px; --py: ${pu.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -231,55 +231,47 @@ function renderExplosions() {
         key: e.id,
         class: `explosion ${e.position}`,
         style: `--px: ${e.x * 48}px; --py: ${e.y * 48}px`,
-      })
-    )
+      }),
+    ),
   );
 }
 
-let lastMoveSent = 0;
-let lastBombSent = 0;
+const handleMove = () => {
+  const [nickname] = useState("nickname");
+  const players = store.get("players") || [];
+  const currentPlayer = players.find((p) => p.nickname === nickname);
+
+  if (
+    !currentPlayer.isvisible ||
+    currentPlayer.isdead ||
+    currentPlayer.ismooving ||
+    currentPlayer.haslostlife
+  ) {
+    requestAnimationFrame(handleMove);
+    return;
+  }
+
+  const key = store.get("keyPressed");
+  const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+
+  if (key === " ") send("BOMB");
+  if (validKeys.includes(key)) send("MOOVE", { direction: key });
+
+  requestAnimationFrame(handleMove);
+};
 
 export function GameView() {
+  store.set({ keyPressed: "" });
+  animationID = requestAnimationFrame(() => handleMove());
+
   return El(
     "div",
     {
       id: "app",
       tabindex: "0",
       autofocus: true,
-      onKeydown: (e) => {
-        const [nickname] = useState("nickname");
-        const players = store.get("players") || [];
-        const currentPlayer = players.find((p) => p.nickname === nickname);
-
-        if (
-          !currentPlayer ||
-          currentPlayer.ismooving ||
-          currentPlayer.haslostlife
-        )
-          return;
-        e.preventDefault();
-
-        // space
-        if (e.key === " ") {
-          const now = Date.now();
-          if (!currentPlayer || currentPlayer.isdead) return;
-          if (now - lastBombSent >= 150) {
-            send("BOMB");
-            lastBombSent = now;
-          }
-          return;
-        }
-
-        // arrow keys
-        const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-        if (validKeys.includes(e.key)) {
-          const now = Date.now();
-          if (now - lastMoveSent >= 50) {
-            send("MOOVE", { direction: e.key });
-            lastMoveSent = now;
-          }
-        }
-      },
+      onKeydown: (e) => store.set({ keyPressed: e.key }),
+      onkeyup: () => store.set({ keyPressed: "" }),
     },
     El(
       "div",
@@ -294,7 +286,7 @@ export function GameView() {
       El("div", { id: "players" }),
       El("div", { id: "bombs" }),
       El("div", { id: "powerups" }),
-      El("div", { id: "explosions" })
-    )
+      El("div", { id: "explosions" }),
+    ),
   );
 }

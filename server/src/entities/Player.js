@@ -1,4 +1,10 @@
-import { MAX_BOMBS, MAX_RANGE, MAX_SPEED } from "../utils/Const.js";
+import {
+  DEFAULT_SPEED_COOLDOWN,
+  LOSING_LIFE_ANIMATION_DURATION,
+  MAX_BOMBS,
+  MAX_RANGE,
+  MAX_SPEED,
+} from "../utils/Const.js";
 
 export class Player {
   constructor(nickname, socket, x, y, number) {
@@ -16,7 +22,7 @@ export class Player {
     this.speed = 1;
     this.direction = "down";
     this._lastMove = 0;
-    this.speedCooldown = 400; //ms
+    this.speedCooldown = DEFAULT_SPEED_COOLDOWN;
     this.lastTimeDamaged = 0;
   }
 
@@ -29,15 +35,15 @@ export class Player {
 
   canMove() {
     const cooldown = this.speedCooldown / this.speed; // speed 1 = 400ms, speed 2 = 200ms
-    return Date.now() - this._lastMove >= cooldown && Date.now() - this.lastTimeDamaged >= 1500;
+    return Date.now() - this._lastMove >= cooldown && !this.isImmortal();
   }
 
   canPlaceBomb() {
     return this.activeBombs < this.maxBombs;
   }
 
-  canBeDamaged() {
-    return Date.now() - this.lastTimeDamaged >= 1500;
+  isImmortal() {
+    return Date.now() - this.lastTimeDamaged < LOSING_LIFE_ANIMATION_DURATION;
   }
 
   loseLife() {
@@ -51,7 +57,7 @@ export class Player {
 
   takePowerUp(pu) {
     if (pu.type === "range" && this.range < MAX_RANGE) this.range++;
-    else if (pu.type === "maxBombs" && this.maxBombs < MAX_BOMBS) this.maxBombs++;
+    else if (pu.type === "maxBombs" && this.maxBombs < MAX_BOMBS)this.maxBombs++;
     else if (pu.type === "speed" && this.speed < MAX_SPEED) this.speed++;
   }
 }

@@ -22,7 +22,7 @@ export const triggerExplosion = (bomb, ROOM) => {
     }
 
     ROOM.players.forEach((p) => {
-      if (p.x === x && p.y === y && p.canBeDamaged()) {
+      if (p.x === x && p.y === y && !p.isImmortal()) {
         p.loseLife();
         if (p.isDead()) deadPlayers.push(p.id);
         else affectedPlayers.push({ id: p.id, remaininglife: p.remaininglife });

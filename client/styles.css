@@ -226,11 +226,11 @@ body {
 }
 
 .player.dying {
-  animation: dying 1.5s steps(1) 1;
+  animation: dying var(--diying) steps(1) 1;
 }
 
 .player.lostlife {
-  animation: blink 1.5s steps(1) 1;
+  animation: blink var(--lostlife) steps(1) 1;
 }
 
 @keyframes walk-down {

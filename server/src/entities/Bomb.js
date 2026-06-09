@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { EXPLOSION_TIMER } from "../utils/Const.js";
 
 export class Bomb {
   constructor(x, y, range = 1) {
@@ -6,7 +7,7 @@ export class Bomb {
     this.x = x;
     this.y = y;
     this.range = range;
-    this.duration = 2400;
+    this.duration = EXPLOSION_TIMER;
   }
 
   explode(map) {

@@ -5,12 +5,12 @@ import { Router } from "./router.js";
 
 const events = new Events();
 const store = new Store();
-const dom = new Dom(document.body, events);
-const router = new Router(dom, store);
-const El = dom.el.bind(dom);
-const getEl = (selector) => dom.query(selector) 
+const bodyDOM = new Dom(document.body, events);
+const router = new Router(bodyDOM, store);
+const El = bodyDOM.el.bind(bodyDOM);
+const getEl = (selector) => bodyDOM.query(selector) 
 
-export { Dom, events, store, router, El, getEl };
+export { Dom, events, store, router, El, getEl, bodyDOM };
 
 export const useState = (key, initialValue = null) => {
   if (store.get(key) === undefined) {
