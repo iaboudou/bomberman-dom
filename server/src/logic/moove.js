@@ -16,7 +16,7 @@ export const MoovePlayer = (direction, player, ROOM) => {
 
   if (!ROOM.map.isWalkable(ny, nx) || bombOnCell) return;
 
-  player.moove(nx, ny, direction);
+  player.moove(nx, ny, direction.toLowerCase().slice(5));
 
   const animationDuration = player.speedCooldown / player.speed;
 

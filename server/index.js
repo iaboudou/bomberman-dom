@@ -35,13 +35,13 @@ function startServer() {
 
           case "MOOVE": {
             const player = room.players.find((p) => p.nickname === clientName);
-            MoovePlayer(data.direction, player, room);
+            if (player) MoovePlayer(data.direction, player, room);
             break;
           }
 
           case "BOMB": {
             const player = room.players.find((p) => p.nickname === clientName);
-            dropBomb(room, player);
+            if (player) dropBomb(room, player);
             break;
           }
         }

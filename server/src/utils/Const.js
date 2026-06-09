@@ -46,5 +46,5 @@ export const POWERUP_CHANCE = 0.3;
 
 export const EXPLOSION_TIMER = 2400; //ms
 
-export const DEFAULT_WAITING_TIME = 20 // secondes
-export const DEFAULT_COUNTDOWN_TIME = 10 //seondes
+export const DEFAULT_WAITING_TIME = 4 // secondes
+export const DEFAULT_COUNTDOWN_TIME = 1 //seondes
