@@ -9,7 +9,7 @@ export function moovePlayer(data) {
                 ...p,
                 x: data.x,
                 y: data.y,
-                direction: data.direction.toLowerCase().slice(5),
+                direction: data.direction,
                 life: data.remaininglife,
                 haslostlife: p.life === data.remaininglife ? false : true,
                 ismooving: p.life === data.remaininglife ? true : false,

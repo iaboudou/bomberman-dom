@@ -123,6 +123,7 @@ function renderUI() {
     ),
   );
 }
+
 function renderGrid() {
   const Map = store.get("map");
 
@@ -135,6 +136,33 @@ function renderGrid() {
         El("div", { key: i, class: `cell ${Map.classes[cell]}` }),
       ),
   );
+}
+
+const updatePlayers = (playerID) => {
+  const players = store.get("players") || [];
+  const currentPlayer = players.find((saved) => saved.id === playerID);
+  
+  if (!currentPlayer) return;
+
+  if (currentPlayer.isdead) {
+    store.set({
+      players: players.map((saved) =>
+        saved.id === playerID ? { ...saved, isvisible: false } : saved
+      ),
+    });
+  } else if (currentPlayer.haslostlife) {
+    store.set({
+      players: players.map((saved) =>
+        saved.id === playerID ? { ...saved, haslostlife: false } : saved
+      ),
+    });
+  } else {
+    store.set({
+      players: players.map((saved) =>
+        saved.id === playerID ? { ...saved, ismooving: false } : saved
+      ),
+    });
+  }
 }
 
 function renderPlayers() {
@@ -152,41 +180,15 @@ function renderPlayers() {
           key: p.id,
           class: getPlayerClass(p),
           style: `
-              --direction: ${playerDirection[p.direction]};
-              --player: ${getPlayerPosition(p)};
+              --sx: ${playerDirection[p.direction]};
+              --sy: ${getPlayerPosition(p)};
               --px: ${p.x * 48}px;
               --py: ${p.y * 48}px;
               --flip: ${p.direction === "right" ? -1 : 1};
               --speed: ${p.speed}ms;
               --diying: ${dyingAnim}s;
               --lostlife: ${lostLifeAnim}s`,
-          onanimationend: () => {
-            const currentPlayers = store.get("players") || [];
-            const currentP = currentPlayers.find((saved) => saved.id === p.id);
-            if (!currentP) return;
-
-            if (currentP.isdead) {
-              store.set({
-                players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, isvisible: false } : saved,
-                ),
-              });
-            } else if (currentP.haslostlife) {
-              store.set({
-                players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, haslostlife: false } : saved,
-                ),
-              });
-            } else {
-              store.set({
-                players: currentPlayers.map((saved) =>
-                  saved.id === p.id ? { ...saved, ismooving: false } : saved,
-                ),
-              });
-            }
-
-            console.log("ended");
-          },
+          onanimationend: () => updatePlayers(p.id),
         }),
     ),
   );
@@ -244,21 +246,22 @@ const handleMove = () => {
   const [nickname] = useState("nickname");
   const players = store.get("players") || [];
   const currentPlayer = players.find((p) => p.nickname === nickname);
+  const key = store.get("keyPressed");
 
   if (
+    !currentPlayer ||
     !currentPlayer.isvisible ||
     currentPlayer.isdead ||
-    currentPlayer.ismooving ||
-    currentPlayer.haslostlife
+    currentPlayer.haslostlife ||
+    currentPlayer.ismooving
   ) {
     animationID = requestAnimationFrame(handleMove);
     return;
   }
 
-  const key = store.get("keyPressed");
-  const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-
   if (key === " ") send("BOMB");
+
+  const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
   if (validKeys.includes(key)) send("MOOVE", { direction: key });
 
   animationID = requestAnimationFrame(handleMove);
@@ -276,11 +279,9 @@ export function GameView() {
       autofocus: true,
       onKeydown: (e) => {
         store.set({ keyPressed: e.key });
-        console.log("DOWN");
       },
       onkeyup: () => {
         store.set({ keyPressed: "" });
-        console.log("up");
       },
     },
     El("div", {}, El("h1", { class: "game-title" }, "BOMBERMAN")),

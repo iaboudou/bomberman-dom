@@ -16,7 +16,7 @@ export function startGame(data) {
         maxlife: p.maxlife,
         direction: p.direction,
         number: p.number,
-        mooving: false,
+        ismooving: false,
         isdead: false,
         haslostlife: false,
         isvisible: true,
