@@ -27,8 +27,8 @@ export function LobbyView() {
 
       El(
         "div",
-        {},
-        El("h1", {}, "BOMBERMAN"),
+        {class: "left"},
+        El("div", { class: "title-wrapper" }, El("h1", {}, "BOMBERMAN")),
         El("p", {}, `Players: ${roomMates.length}/4`),
         El(
           "p",
@@ -64,7 +64,7 @@ export function LobbyView() {
       ),
       El(
         "div",
-        {},
+        {class: "rigth"},
         El("h3", {}, "Lobby Chat"),
         El(
           "div",

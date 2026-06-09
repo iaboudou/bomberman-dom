@@ -281,7 +281,11 @@ export function GameView() {
         }
       },
     },
-    El("h1", { class: "game-title" }, "BOMBERMAN"),
+    El(
+      "div",
+      {},
+      El("h1", { class: "game-title" }, "BOMBERMAN")
+    ),
     El("div", { id: "ui" }),
     El(
       "div",

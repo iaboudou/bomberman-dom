@@ -12,7 +12,11 @@ export function WelcomeView() {
       "div",
       { class: "welcome-card" },
       El("span", { class: "welcome-badge" }, "Multiplayer"),
-      El("h1", { class: "welcome-title" }, "BOMBERMAN"),
+      El(
+        "div",
+        { class: "title-wrapper" },
+        El("h1", { class: "welcome-title" }, "BOMBERMAN")
+      ),
       El(
         "p",
         { class: "welcome-subtitle" },
@@ -29,7 +33,7 @@ export function WelcomeView() {
             e.preventDefault();
             const nickname = e.target.nickname.value.trim();
             if (nickname.length > 0 && nickname.length <= 10) {
-              send("JOIN", { nickname })
+              send("JOIN", { nickname });
             } else {
               setError("Nickname must be between 1 and 10 characters.");
             }
