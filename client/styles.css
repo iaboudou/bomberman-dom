@@ -34,31 +34,6 @@ body {
   outline: none;
 }
 
-/*  */
-.title-wrapper {
-  transform: translateZ(0);
-  isolation: isolate;
-}
-
-.game-title {
-  text-align: center;
-  font-size: 2rem;
-  color: white;
-  margin: 0 0 16px 0;
-  animation: float 6s ease-in-out infinite;
-}
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-/*  */
-
 #ui {
   display: flex;
   align-items: center;
@@ -644,21 +619,6 @@ body {
   border-radius: 20px;
 }
 
-/*  */
-
-.title-wrapper {
-  isolation: isolate;
-  transform: translateZ(0);
-}
-
-.welcome-title {
-  font-size: 42px;
-  text-transform: uppercase;
-  animation: float 6s ease-in-out infinite;
-}
-
-/*  */
-
 .welcome-subtitle {
   color: #888;
   font-size: 14px;
@@ -770,13 +730,6 @@ body {
 .lobby-screen .title-wrapper {
   transform: translateZ(0);
   isolation: isolate;
-}
-
-.lobby-screen h1 {
-  font-size: 42px;
-  text-transform: uppercase;
-  animation: float 6s ease-in-out infinite;
-  margin: 0;
 }
 
 .left > p:first-of-type {
@@ -968,4 +921,45 @@ body {
   padding: 18px;
   cursor: pointer;
   margin-top: auto;
+}
+
+/*  */
+
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+.title-wrapper {
+  transform: translateZ(0);
+  isolation: isolate;
+}
+
+.game-title {
+  text-align: center;
+  font-size: 2rem;
+  color: white;
+  margin: 0 0 16px 0;
+  animation: float 6s ease-in-out infinite;
+  text-rendering: optimizeSpeed; 
+  paint-order: normal;
+}
+
+.welcome-title {
+  font-size: 42px;
+  text-transform: uppercase;
+  animation: float 6s ease-in-out infinite;
+}
+
+.lobby-screen h1 {
+  font-size: 42px;
+  text-transform: uppercase;
+  animation: float 6s ease-in-out infinite;
+  margin: 0;
 }
