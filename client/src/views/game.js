@@ -10,7 +10,7 @@ import {
 } from "../../mini-framework/index.js";
 import { getPlayerClass, getPlayerPosition, playerDirection } from "./utils.js";
 
-let animationID;
+let animationID = null;
 let uiDom, gridDom, playersDom, bombsDom, powerupsDom, explosionsDom;
 let domsInitialized = false;
 const subs = [];
@@ -69,6 +69,8 @@ export function initDoms() {
 }
 
 export function resetDoms() {
+  cancelAnimationFrame(animationID);
+  animationID = null;
   bodyDOM.mount(null);
   subs.forEach(([key, cb]) => store.unsubscribe(key, cb));
   subs.length = 0;
@@ -182,6 +184,8 @@ function renderPlayers() {
                 ),
               });
             }
+
+            console.log("ended");
           },
         }),
     ),
@@ -247,7 +251,7 @@ const handleMove = () => {
     currentPlayer.ismooving ||
     currentPlayer.haslostlife
   ) {
-    requestAnimationFrame(handleMove);
+    animationID = requestAnimationFrame(handleMove);
     return;
   }
 
@@ -257,7 +261,7 @@ const handleMove = () => {
   if (key === " ") send("BOMB");
   if (validKeys.includes(key)) send("MOOVE", { direction: key });
 
-  requestAnimationFrame(handleMove);
+  animationID = requestAnimationFrame(handleMove);
 };
 
 export function GameView() {
@@ -270,14 +274,16 @@ export function GameView() {
       id: "app",
       tabindex: "0",
       autofocus: true,
-      onKeydown: (e) => store.set({ keyPressed: e.key }),
-      onkeyup: () => store.set({ keyPressed: "" }),
+      onKeydown: (e) => {
+        store.set({ keyPressed: e.key });
+        console.log("DOWN");
+      },
+      onkeyup: () => {
+        store.set({ keyPressed: "" });
+        console.log("up");
+      },
     },
-    El(
-      "div",
-      {},
-      El("h1", { class: "game-title" }, "BOMBERMAN")
-    ),
+    El("div", {}, El("h1", { class: "game-title" }, "BOMBERMAN")),
     El("div", { id: "ui" }),
     El(
       "div",

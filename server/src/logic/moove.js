@@ -31,13 +31,13 @@ export const MoovePlayer = (direction, player, ROOM) => {
     (e) => e.x === nx && e.y === ny,
   );
 
-  if (isInExplosion && !player.isImmortal()){
+  if (isInExplosion && !player.isImmortal()) {
     player.loseLife();
   }
 
   const alivePlayers = ROOM.players.filter((p) => !p.isDead());
 
-  if (alivePlayers.length <= 1) ROOM.endGame(alivePlayers[0])
+  if (alivePlayers.length <= 1) ROOM.endGame(alivePlayers[0]);
   else {
     ROOM.players.forEach((p) => {
       sendTofront(p.socket, "PLAYER_MOOVED", {

@@ -13,7 +13,7 @@ export const playerDirection = {
 };
 
 export const getPlayerClass = (player) => {
-    const base = `player player${player.number}`;
+    const base = `player`;
 
     if (player.isdead) return `${base} dying`;
     if (player.haslostlife) return `${base} lostlife`;
