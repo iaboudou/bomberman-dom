@@ -50,6 +50,18 @@ export function initDoms() {
   const onPowerups = () => powerupsDom.scheduleMount(renderPowerups());
   const onExplosions = () => explosionsDom.scheduleMount(renderExplosions());
   const onMap = () => gridDom.scheduleMount(renderGrid());
+  const onKeydown = (e) => {
+    keysPressed.add(e.key);
+    store.set({ keyPressed: e.key });
+  };
+  const onKeyup = (e) => {
+    keysPressed.delete(e.key);
+    const last = [...keysPressed].at(-1) || "";
+    store.set({ keyPressed: last });
+  };
+
+  events.on(window, "keydown", onKeydown);
+  events.on(window, "keyup", onKeyup);
 
   subs.push(["players", onPlayers]);
   subs.push(["playersLife", onPlayersLife]);
@@ -57,6 +69,8 @@ export function initDoms() {
   subs.push(["powerups", onPowerups]);
   subs.push(["explosions", onExplosions]);
   subs.push(["map", onMap]);
+  subs.push(["keydown", onKeydown]);
+  subs.push(["keyup", onKeyup]);
 
   subs.forEach(([key, cb]) => store.subscribe(key, cb));
 
@@ -69,8 +83,16 @@ export function initDoms() {
 }
 
 export function resetDoms() {
+  const keydownEntry = subs.find(([key]) => key === "keydown");
+  const keyupEntry = subs.find(([key]) => key === "keyup");
+
+  if (keydownEntry) events.off(window, "keydown", keydownEntry[1]);
+  if (keyupEntry) events.off(window, "keyup", keyupEntry[1]);
+
   bodyDOM.mount(null);
-  subs.forEach(([key, cb]) => store.unsubscribe(key, cb));
+  subs.forEach(([key, cb]) => {
+    if (!key.startsWith("__")) store.unsubscribe(key, cb);
+  });
   subs.length = 0;
 
   uiDom = gridDom = playersDom = bombsDom = powerupsDom = explosionsDom = null;
@@ -272,20 +294,7 @@ export function GameView() {
 
   return El(
     "div",
-    {
-      id: "app",
-      tabindex: "0",
-      autofocus: true,
-      onKeydown: (e) => {
-        keysPressed.add(e.key);
-        store.set({ keyPressed: e.key });
-      },
-      onKeyup: (e) => {
-        keysPressed.delete(e.key);
-        const last = [...keysPressed].at(-1) || "";
-        store.set({ keyPressed: last });
-      },
-    },
+    { id: "app" },
     El("div", {}, El("h1", { class: "game-title" }, "BOMBERMAN")),
     El("div", { id: "ui" }),
     El(
