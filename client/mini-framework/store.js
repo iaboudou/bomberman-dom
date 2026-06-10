@@ -70,5 +70,6 @@ export class Store {
 
   reset() {
     this.state = {};
+    this.listeners = {};
   }
 }

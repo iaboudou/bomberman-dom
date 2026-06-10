@@ -10,10 +10,10 @@ import {
 } from "../../mini-framework/index.js";
 import { getPlayerClass, getPlayerPosition, playerDirection } from "./utils.js";
 
-let animationID = null;
 let uiDom, gridDom, playersDom, bombsDom, powerupsDom, explosionsDom;
 let domsInitialized = false;
 const subs = [];
+const keysPressed = new Set();
 
 export function initDoms() {
   if (domsInitialized) return;
@@ -69,8 +69,6 @@ export function initDoms() {
 }
 
 export function resetDoms() {
-  cancelAnimationFrame(animationID);
-  animationID = null;
   bodyDOM.mount(null);
   subs.forEach(([key, cb]) => store.unsubscribe(key, cb));
   subs.length = 0;
@@ -140,30 +138,33 @@ function renderGrid() {
 
 const updatePlayers = (playerID) => {
   const players = store.get("players") || [];
-  const currentPlayer = players.find((saved) => saved.id === playerID);
-  
+  const currentPlayer = players.find((p) => p.id === playerID);
+
   if (!currentPlayer) return;
 
   if (currentPlayer.isdead) {
     store.set({
-      players: players.map((saved) =>
-        saved.id === playerID ? { ...saved, isvisible: false } : saved
+      players: players.map((p) =>
+        p.id === playerID ? { ...p, isvisible: false } : p,
       ),
     });
   } else if (currentPlayer.haslostlife) {
     store.set({
-      players: players.map((saved) =>
-        saved.id === playerID ? { ...saved, haslostlife: false } : saved
+      players: players.map((p) =>
+        p.id === playerID ? { ...p, haslostlife: false } : p,
       ),
     });
   } else {
     store.set({
-      players: players.map((saved) =>
-        saved.id === playerID ? { ...saved, ismooving: false } : saved
+      players: players.map((p) =>
+        p.id === playerID ? { ...p, ismooving: false } : p,
       ),
     });
   }
-}
+
+  const moove = store.get("keyPressed");
+  if (moove !== "") handleMove();
+};
 
 function renderPlayers() {
   const players = store.get("players") || [];
@@ -253,23 +254,21 @@ const handleMove = () => {
     !currentPlayer.isvisible ||
     currentPlayer.isdead ||
     currentPlayer.haslostlife ||
-    currentPlayer.ismooving
+    currentPlayer.ismooving ||
+    key === ""
   ) {
-    animationID = requestAnimationFrame(handleMove);
     return;
   }
 
-  if (key === " ") send("BOMB");
-
   const validKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-  if (validKeys.includes(key)) send("MOOVE", { direction: key });
 
-  animationID = requestAnimationFrame(handleMove);
+  if (key === " ") send("BOMB");
+  else if (validKeys.includes(key)) send("MOOVE", { direction: key });
 };
 
 export function GameView() {
   store.set({ keyPressed: "" });
-  animationID = requestAnimationFrame(() => handleMove());
+  store.subscribe("keyPressed", () => handleMove());
 
   return El(
     "div",
@@ -278,10 +277,13 @@ export function GameView() {
       tabindex: "0",
       autofocus: true,
       onKeydown: (e) => {
+        keysPressed.add(e.key);
         store.set({ keyPressed: e.key });
       },
-      onkeyup: () => {
-        store.set({ keyPressed: "" });
+      onKeyup: (e) => {
+        keysPressed.delete(e.key);
+        const last = [...keysPressed].at(-1) || "";
+        store.set({ keyPressed: last });
       },
     },
     El("div", {}, El("h1", { class: "game-title" }, "BOMBERMAN")),
