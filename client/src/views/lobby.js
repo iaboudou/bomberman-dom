@@ -21,6 +21,7 @@ export function LobbyView() {
   return El(
     "div",
     { class: "lobby-screen" },
+    El("div", {id: "logo"}, "BOMBERMAN"),
     El(
       "div",
       { class: "lobby-container" },
@@ -28,7 +29,6 @@ export function LobbyView() {
       El(
         "div",
         {class: "left"},
-        El("div", { class: "title-wrapper" }, El("h1", {}, "BOMBERMAN")),
         El("p", {}, `Players: ${roomMates.length}/4`),
         El(
           "p",
@@ -86,7 +86,7 @@ export function LobbyView() {
               e.preventDefault();
 
               const now = Date.now();
-              if (now - lastChatSent < 100) return;
+              if (now - lastChatSent < 300) return;
 
               const input = e.target.message;
               const message = input.value.trim();

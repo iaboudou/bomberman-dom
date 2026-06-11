@@ -8,15 +8,11 @@ export function WelcomeView() {
   return El(
     "div",
     { class: "welcome-screen" },
+    El("div", {id: "logo"}, "BOMBERMAN"),
     El(
       "div",
       { class: "welcome-card" },
       El("span", { class: "welcome-badge" }, "Multiplayer"),
-      El(
-        "div",
-        { class: "title-wrapper" },
-        El("h1", { class: "welcome-title" }, "BOMBERMAN")
-      ),
       El(
         "p",
         { class: "welcome-subtitle" },

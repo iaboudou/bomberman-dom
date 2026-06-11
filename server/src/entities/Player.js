@@ -58,6 +58,6 @@ export class Player {
   takePowerUp(pu) {
     if (pu.type === "range" && this.range < MAX_RANGE) this.range++;
     else if (pu.type === "maxBombs" && this.maxBombs < MAX_BOMBS)this.maxBombs++;
-    else if (pu.type === "speed" && this.speed < MAX_SPEED) this.speed++;
+    else if (pu.type === "speed" && this.speed < MAX_SPEED) this.speed += 0.5;
   }
 }

@@ -295,7 +295,7 @@ export function GameView() {
   return El(
     "div",
     { id: "app" },
-    El("div", {}, El("h1", { class: "game-title" }, "BOMBERMAN")),
+    El("div", {id: "logo"}, "BOMBERMAN"),
     El("div", { id: "ui" }),
     El(
       "div",

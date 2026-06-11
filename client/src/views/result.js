@@ -12,6 +12,7 @@ export function ResultView() {
   return El(
     "div",
     { class: "result-container" },
+    El("div", {id: "logo"}, "BOMBERMAN"),
     El(
       "h1",
       { class: "game-title" },
