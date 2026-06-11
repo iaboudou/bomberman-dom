@@ -13,16 +13,17 @@ export const playerDirection = {
 };
 
 export const getPlayerClass = (player) => {
-    const base = `player`;
+  const base = `player`;
 
-    if (player.isdead) return `${base} dying`;
-    if (player.haslostlife) return `${base} lostlife`;
-    if (player.ismooving) return `${base} walking ${player.direction}`;
+  if (player.isdead) return `${base} dying`;
+  if (player.haslostlife) return `${base} lostlife`;
+  if (player.ismooving) return `${base} walking ${player.direction}`;
 
-    return base;
+  return base;
 };
 
 export const getPlayerPosition = (player, iswinner = true) => {
-    if (player.isdead || !iswinner) return `-${playerPosition[player.number] + 50}px`;
-    return `-${playerPosition[player.number]}px`;
+  if (player.isdead || !iswinner)
+    return `-${playerPosition[player.number] + 50}px`;
+  return `-${playerPosition[player.number]}px`;
 };

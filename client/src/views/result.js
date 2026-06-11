@@ -27,7 +27,7 @@ export function ResultView() {
           {
             key: p.id,
             class: `${winner && p.id === winner.id ? "playerWinner" : "playerLoser"}`,
-            style: `--player: ${getPlayerPosition(p, winner && p.id === winner.id)};`,
+            style: `--player: ${getPlayerPosition(p, !!(winner && p.id === winner.id))};`,
           },
           El("div", { class: "result-nickname" }, p.nickname),
         ),
