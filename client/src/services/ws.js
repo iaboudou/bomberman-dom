@@ -7,7 +7,7 @@ import { moovePlayer } from "./handlers/mooves.js";
 export let ws = null;
 
 export function startWebsocketService() {
-  ws = new WebSocket(`ws://10.1.9.8:8080`);
+  ws = new WebSocket(`ws://localhost:8080`);
   ws.onopen = () => console.log("connected to the ws");
   ws.onerror = (err) => console.error(err);
   ws.onmessage = onMessage;
