@@ -163,114 +163,12 @@ body {
   will-change: translate;
   translate: var(--px) var(--py);
   transform: scaleX(var(--flip));
-  transition: translate var(--speed) linear;
-}
-
-.player::before {
-  content: "";
-  display: block;
-  width: 608px;
-  height: 1374px;
+  transition: translate 200ms linear;
   background-image: url("./images/bomberman.png");
   background-size: 608px 1374px;
-  transform: translate(var(--sx), var(--sy));
+  background-position: var(--direction) var(--player);
+  image-rendering: pixelated;
   will-change: transform;
-}
-
-.player.walking.down::before {
-  animation: walk-down var(--speed) steps(1) 1 forwards;
-}
-
-.player.walking.up::before {
-  animation: walk-up var(--speed) steps(1) 1 forwards;
-}
-
-.player.walking.left::before {
-  animation: walk-left var(--speed) steps(1) 1 forwards;
-}
-
-.player.walking.right::before {
-  animation: walk-right var(--speed) steps(1) 1 forwards;
-}
-
-.player.dying::before {
-  animation: dying var(--diying) steps(1) 1;
-}
-
-.player.lostlife {
-  animation: blink var(--lostlife) steps(1) 1;
-}
-
-@keyframes walk-down {
-  0% {
-    transform: translate(0px, var(--sy));
-  }
-
-  25% {
-    transform: translate(-50px, var(--sy));
-  }
-
-  50% {
-    transform: translate(0px, var(--sy));
-  }
-
-  75% {
-    transform: translate(-110px, var(--sy));
-  }
-}
-
-@keyframes walk-up {
-  0% {
-    transform: translate(-300px, var(--sy));
-  }
-
-  25% {
-    transform: translate(-350px, var(--sy));
-  }
-
-  50% {
-    transform: translate(-300px, var(--sy));
-  }
-
-  75% {
-    transform: translate(-410px, var(--sy));
-  }
-}
-
-@keyframes walk-left {
-  0% {
-    transform: translate(-156px, var(--sy));
-  }
-
-  25% {
-    transform: translate(-206px, var(--sy));
-  }
-
-  50% {
-    transform: translate(-156px, var(--sy));
-  }
-
-  75% {
-    transform: translate(-256px, var(--sy));
-  }
-}
-
-@keyframes walk-right {
-  0% {
-    transform: translate(-156px, var(--sy));
-  }
-
-  25% {
-    transform: translate(-206px, var(--sy));
-  }
-
-  50% {
-    transform: translate(-156px, var(--sy));
-  }
-
-  75% {
-    transform: translate(-256px, var(--sy));
-  }
 }
 
 @keyframes dying {

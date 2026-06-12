@@ -10,8 +10,8 @@ export function startGame(data) {
       return {
         id: p.id,
         nickname: p.nickname,
-        x: p.x,
-        y: p.y,
+        x: p.x*3,
+        y: p.y*3,
         life: p.remaininglife,
         maxlife: p.maxlife,
         direction: p.direction,
@@ -20,6 +20,7 @@ export function startGame(data) {
         isdead: false,
         haslostlife: false,
         isvisible: true,
+        currentFrame: 0,
         speed: 0,
       };
     }),

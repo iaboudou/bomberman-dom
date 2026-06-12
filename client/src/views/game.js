@@ -203,15 +203,29 @@ function renderPlayers() {
           key: p.id,
           class: getPlayerClass(p),
           style: `
-              --sx: ${playerDirection[p.direction]};
-              --sy: ${getPlayerPosition(p)};
-              --px: ${p.x * 48}px;
-              --py: ${p.y * 48}px;
+              --direction: ${playerDirection[p.direction + p.currentFrame]};
+              --player: ${getPlayerPosition(p)};
+              --px: ${p.x * 16}px;
+              --py: ${p.y * 16}px;
               --flip: ${p.direction === "right" ? -1 : 1};
               --speed: ${p.speed}ms;
               --diying: ${dyingAnim}s;
               --lostlife: ${lostLifeAnim}s`,
           onanimationend: () => updatePlayers(p.id),
+          ontransitionend: () => {
+            console.log("ici")
+            if (p.currentFrame !== 0) animateMove(p, players, p.direction);
+            else if (p.currentFrame === 0) {
+              store.set({
+                players: players.map((saved) =>
+                  saved.id === p.id ? { ...p, ismooving: false } : p,
+                ),
+              });
+
+              const hasPressedKey = store.get("keyPressed") !== "";
+              if (hasPressedKey) handleMove();
+            }
+          },
         }),
     ),
   );
@@ -265,6 +279,32 @@ function renderExplosions() {
   );
 }
 
+export function animateMove(player, players, dir) {
+  let nx = player.x;
+  let ny = player.y;
+  const newframe = player.currentFrame === 2 ? 0 : player.currentFrame + 1;
+
+  if (dir === "up") ny--;
+  else if (dir === "down") ny++;
+  else if (dir === "left") nx--;
+  else if (dir === "right") nx++;
+  console.log(players)
+  store.set({
+    players: players.map((p) =>
+      p.id === player.id
+        ? {
+            ...p,
+            x: nx,
+            y: ny,
+            direction: dir,
+            currentFrame: newframe,
+            ismooving: true,
+          }
+        : p,
+    ),
+  });
+}
+
 const handleMove = () => {
   const [nickname] = useState("nickname");
   const players = store.get("players") || [];
@@ -295,7 +335,7 @@ export function GameView() {
   return El(
     "div",
     { id: "app" },
-    El("div", {id: "logo"}, "BOMBERMAN"),
+    El("div", { id: "logo" }, "BOMBERMAN"),
     El("div", { id: "ui" }),
     El(
       "div",

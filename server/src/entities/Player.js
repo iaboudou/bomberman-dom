@@ -35,7 +35,7 @@ export class Player {
 
   canMove() {
     const cooldown = this.speedCooldown / this.speed; // speed 1 = 400ms, speed 2 = 200ms
-    return Date.now() - this._lastMove >= cooldown && !this.isImmortal();
+    return Date.now() - this._lastMove >= cooldown;
   }
 
   canPlaceBomb() {

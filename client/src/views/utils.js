@@ -6,18 +6,26 @@ export const playerPosition = {
 };
 
 export const playerDirection = {
-  down: "0px",
-  up: "-300px",
-  left: "-156px",
-  right: "-156px",
+  down0: "0px",
+  down1: "-50px",
+  down2: "-110px",
+  up0: "-300px",
+  up1: "-350px",
+  up2: "-410px",
+  left0: "-156px",
+  left1: "-206px",
+  left2: "-256px",
+  right0: "-156px",
+  right1: "-206px",
+  right2: "-256px",
 };
 
 export const getPlayerClass = (player) => {
-  const base = `player`;
+  let base = `player`;
 
   if (player.isdead) return `${base} dying`;
-  if (player.haslostlife) return `${base} lostlife`;
-  if (player.ismooving) return `${base} walking ${player.direction}`;
+  if (player.haslostlife) base += " lostlife";
+  if (player.ismooving) base += ` walking ${player.direction}`;
 
   return base;
 };
